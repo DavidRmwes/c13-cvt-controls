@@ -3,507 +3,559 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C13 CVT – Controls Engineering Reference</title>
+<title>C13 CVT – Controls Hub | MWES</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+:root{--g:#3BB149;--n:#283549;--o:#D07A08;--gr:#E9E9E9;--nl:#344863;--nd:#1c2636;--ndr:#151d2b;--gd:#2d8a38;--gb:#4cd95a;--ob:#f0a030;--tp:#E9E9E9;--ts:#a0aec0;--tm:#6b7a8d;--bd:#3d4f65;--cb:#1e3044}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;padding:16px;min-height:100vh}
-.container{max-width:1600px;margin:0 auto}
-h1{font-size:22px;font-weight:700;color:#f8fafc}
-.subtitle{font-size:12px;color:#94a3b8;margin:2px 0 12px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px}
-.stat-card{background:#1e293b;border-radius:6px;padding:8px 10px}
-.stat-val{font-size:22px;font-weight:700}
-.stat-lbl{font-size:10px;font-weight:600;color:#cbd5e1}
-.stat-sub{font-size:9px;color:#64748b}
-.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.filter-btn{font-size:11px;padding:5px 14px;border-radius:5px;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#94a3b8;transition:all 0.15s}
-.filter-btn.active{border-color:#e2e8f0;background:#334155;color:#f8fafc}
-.filter-btn:hover{border-color:#64748b}
-.map-container{background:#1e293b;border-radius:8px;border:1px solid #334155;padding:12px;margin-bottom:14px}
-.map-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;color:#64748b}
-.cardinal{color:#f8fafc;font-size:10px;font-weight:600}
-svg text{user-select:none;pointer-events:none}
-.station-group{cursor:pointer;transition:opacity 0.15s}
-.station-group:hover .station-fill{opacity:1!important;filter:brightness(1.3)}
-.station-group:hover .station-border{stroke-width:0.8!important;stroke:#f8fafc!important}
-.detail-panel{background:#1e293b;border-radius:8px;padding:18px;margin-bottom:14px;display:none}
-.detail-panel.visible{display:block}
-.detail-header{display:flex;justify-content:space-between;align-items:flex-start}
-.detail-title{font-size:18px;font-weight:700}
-.detail-zone{font-size:12px;color:#64748b;margin:2px 0 12px}
-.close-btn{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:22px;padding:0 6px}
-.close-btn:hover{color:#f8fafc}
-.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.badge{font-size:11px;padding:3px 10px;border-radius:5px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:900px){.two-col{grid-template-columns:1fr}}
-.section-title{font-size:13px;font-weight:700;color:#94a3b8;margin:0 0 8px;border-bottom:1px solid #334155;padding-bottom:5px}
-.section-title.red{color:#ef4444;border-color:#7f1d1d}
-.hw-block{margin-bottom:10px;padding:8px;background:#0f172a;border-radius:5px}
-.hw-label{font-size:11px;font-weight:600}
-.hw-val{font-size:12px;color:#e2e8f0;margin-top:2px}
-.hw-sub{font-size:11px;color:#94a3b8}
-.hw-warn{font-size:11px;color:#fbbf24}
-.eq-item{font-size:12px;color:#cbd5e1;padding:3px 0;border-bottom:1px solid #1e293b}
-.concern-item{font-size:12px;padding:6px 8px;margin-bottom:4px;border-radius:4px;border-left:3px solid #334155;background:#0f172a;color:#cbd5e1;line-height:1.5}
-.concern-item.critical{border-left-color:#f59e0b;background:#422006;color:#fbbf24}
-.project-concerns{background:#1e293b;border-radius:8px;border:2px solid #dc2626;padding:18px}
-.project-concerns h3{font-size:16px;font-weight:700;color:#ef4444;margin:0 0 10px}
-.pc-item{padding:10px 12px;margin-bottom:8px;border-radius:5px}
-.pc-item.high{background:#450a0a;border-left:4px solid #ef4444}
-.pc-item.medium{background:#422006;border-left:4px solid #f59e0b}
-.pc-item.low{background:#0f172a;border-left:4px solid #64748b}
-.pc-header{display:flex;justify-content:space-between;align-items:center}
-.pc-title{font-size:13px;font-weight:700}
-.pc-title.high{color:#fca5a5}.pc-title.medium{color:#fcd34d}.pc-title.low{color:#94a3b8}
-.pc-sev{font-size:10px;padding:2px 8px;border-radius:4px}
-.pc-sev.high{background:#7f1d1d;color:#fca5a5}.pc-sev.medium{background:#713f12;color:#fcd34d}.pc-sev.low{background:#1e293b;color:#94a3b8}
-.pc-desc{font-size:12px;color:#cbd5e1;margin-top:5px;line-height:1.6}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--n);color:var(--tp);min-height:100vh}
+h1,h2,h3,.hdr{font-family:'Oswald',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.5px}
+.nav{background:var(--nd);border-bottom:3px solid var(--g);display:flex;align-items:stretch;position:sticky;top:0;z-index:200}
+.nav-logo{display:flex;align-items:center;gap:10px;padding:8px 16px;border-right:1px solid var(--bd)}
+.logo-m{width:34px;height:34px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-family:Oswald;font-weight:700;font-size:14px;color:#fff}
+.nav-t{font-family:Oswald;font-size:13px;font-weight:600;color:#fff;letter-spacing:1px}
+.nav-s{font-size:9px;color:var(--ts)}
+.nav-btns{display:flex;align-items:stretch;flex:1}
+.nb{font-family:Oswald;font-size:12px;letter-spacing:.5px;text-transform:uppercase;padding:10px 18px;cursor:pointer;border:none;background:0;color:var(--ts);border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.nb:hover{color:#fff;background:var(--nl)}
+.nb.act{color:var(--g);border-bottom-color:var(--g);background:rgba(59,177,73,.08)}
+.nb .num{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--nl);color:var(--ts)}
+.nb.act .num{background:var(--g);color:#fff}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:6px;padding:0 14px}
+.nt{font-family:Oswald;font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:.5px}
+.scr{display:none;padding:16px 20px 40px;max-width:1500px;margin:0 auto}
+.scr.act{display:block}
+.card{background:var(--cb);border-radius:6px;padding:14px;margin-bottom:10px;border:1px solid var(--bd)}
+.card.w{border-color:var(--o);border-left:4px solid var(--o)}.card.d{border-color:#c0392b;border-left:4px solid #c0392b}
+.card.i{border-color:var(--g);border-left:4px solid var(--g)}.card.s{border-color:var(--g);background:#1a3328}
+.tg{display:inline-block;font-family:Oswald;font-size:9px;padding:2px 7px;border-radius:3px;margin-right:3px;letter-spacing:.5px;text-transform:uppercase}
+.tg-g{background:var(--gd);color:var(--gb)}.tg-o{background:#5c3a10;color:var(--ob)}.tg-r{background:#5c1a1a;color:#f87171}
+.tg-b{background:#1e3a5f;color:#7eb8f0}.tg-p{background:#3b1764;color:#c4b5fd}.tg-gr{background:var(--nl);color:var(--ts);border:1px solid var(--bd)}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:11px}
+th{background:var(--nd);color:var(--g);text-align:left;padding:5px 8px;border:1px solid var(--bd);font-family:Oswald;font-weight:500;font-size:10px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+td{padding:5px 8px;border:1px solid var(--bd);color:var(--tp);vertical-align:top}
+tr:hover td{background:var(--nl)}
+.mo{font-family:'Courier New',monospace;font-size:11px;color:var(--gb)}
+.mb{background:var(--ndr);border-radius:6px;padding:10px;margin:8px 0;font-family:'Courier New',monospace;font-size:10px;color:var(--gb);line-height:1.6;overflow-x:auto;white-space:pre;border:1px solid var(--bd)}
+.rc{background:#0c0a09;border:1px solid var(--o);border-radius:6px;padding:10px;margin:8px 0;font-family:'Courier New',monospace;font-size:10px;color:var(--ob);line-height:1.6;overflow-x:auto;white-space:pre}
+.oq{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--o);background:#3d2a10;font-size:11px;color:var(--ob);line-height:1.5}
+.nt2{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--g);background:#1a3328;font-size:11px;color:var(--gb);line-height:1.5}
+.dn{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid #c0392b;background:#3d1515;font-size:11px;color:#f87171;line-height:1.5}
+.rv{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--g);background:#14332a;font-size:11px;color:var(--gb);line-height:1.5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.sd{height:3px;background:linear-gradient(90deg,var(--g),var(--o),var(--g));border-radius:2px;margin:16px 0;opacity:.4}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px;margin-bottom:10px}
+.sc2{background:var(--cb);border-radius:5px;padding:6px 8px}
+.sv{font-size:18px;font-weight:700}.sl{font-size:9px;font-weight:600;color:var(--ts)}.ss{font-size:8px;color:var(--tm)}
+.fb{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.fbtn{font-family:Oswald;font-size:10px;padding:4px 12px;border-radius:4px;cursor:pointer;border:1px solid var(--bd);background:var(--ndr);color:var(--ts);letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.fbtn.act{border-color:var(--g);background:var(--cb);color:var(--g)}.fbtn:hover{border-color:var(--ts)}
+.stg{cursor:pointer;transition:opacity .15s}.stg:hover .sf{opacity:1!important;filter:brightness(1.3)}.stg:hover .sb{stroke:#f8fafc!important;stroke-width:.8!important}
+.dp{background:var(--cb);border-radius:6px;padding:14px;margin-bottom:10px;display:none}
+.dp.vis{display:block}
+.scard{background:var(--ndr);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--bd);transition:border-color .15s}
+.scard:hover{border-color:var(--g)}.scard.exp{border-color:var(--g);border-left:4px solid var(--g)}
+.sdet{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}.scard.exp .sdet{display:block}
+.shdr{display:flex;justify-content:space-between;align-items:center}
+.ei{color:var(--tm);font-size:12px;transition:transform .2s}.scard.exp .ei{transform:rotate(180deg);color:var(--g)}
+/* Flow nodes */
+.flow-tab{font-family:Oswald;font-size:11px;padding:5px 14px;border-radius:4px 4px 0 0;cursor:pointer;border:1px solid var(--bd);border-bottom:none;background:var(--ndr);color:var(--ts);letter-spacing:.5px;text-transform:uppercase}
+.flow-tab.act{background:var(--cb);color:var(--g);border-color:var(--g)}
+.flow-container{background:var(--cb);border:1px solid var(--bd);border-radius:0 6px 6px 6px;padding:14px;margin-bottom:10px}
+.flow-step{display:inline-flex;align-items:center;margin:3px 0}
+.flow-box{padding:6px 10px;border-radius:5px;font-size:11px;font-weight:500;line-height:1.3;text-align:center;min-width:90px}
+.flow-arrow{color:var(--tm);font-size:16px;margin:0 4px;font-weight:700}
+.flow-sub{padding:4px 8px;border-radius:4px;font-size:10px;border:1px dashed var(--bd);color:var(--ts);text-align:center;min-width:80px}
+.footer{margin-top:30px;padding:12px 20px;background:var(--nd);border-top:3px solid var(--g);text-align:center}
+.footer-l{font-family:Oswald;font-size:14px;font-weight:700;color:var(--g);margin-bottom:2px}
+.footer-t{font-family:Oswald;font-size:9px;color:var(--tm);letter-spacing:1px;text-transform:uppercase}
 </style>
 </head>
 <body>
-<div class="container">
-<h1>C13 CVT Transmission — Controls Engineering Reference</h1>
-<p class="subtitle">Interactive controls hardware map | Cardinal directions corrected | Click any station for full details | MWES – CNH America LLC</p>
 
-<div class="stats-grid" id="statsGrid"></div>
-<div class="filter-bar" id="filterBar"></div>
-
-<div class="map-container">
-  <div class="map-header">
-    <span>FLOOR MAP — Click any station block for full controls details | Corrected orientation: ← EAST | WEST →</span>
-    <div style="display:flex;gap:12px">
-      <span class="cardinal">↑ SOUTH</span><span class="cardinal">↓ NORTH</span>
-      <span class="cardinal">← EAST</span><span class="cardinal">WEST →</span>
-    </div>
-  </div>
-  <svg id="floorMap" viewBox="-8 -12 160 88" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-height:620px;display:block"></svg>
-  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10px">
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#3b82f6"></span><span style="color:#94a3b8">PLC Station</span></span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#a855f7"></span><span style="color:#94a3b8">Promess Press</span></span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#22d3ee"></span><span style="color:#94a3b8">Cognex Vision</span></span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#14b8a6"></span><span style="color:#94a3b8">Point I/O</span></span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#475569"></span><span style="color:#94a3b8">No PLC (Pivotware Only)</span></span>
-    <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#dc2626"></span><span style="color:#94a3b8">Anomaly / Risk</span></span>
-  </div>
+<!-- ═══════ HMI NAV BAR ═══════ -->
+<div class="nav">
+<div class="nav-logo">
+  <div class="logo-m">M</div>
+  <div><div class="nav-t">MWES</div><div class="nav-s">C13 CVT Transmission</div></div>
+</div>
+<div class="nav-btns">
+  <button class="nb act" onclick="showScreen(0)"><span class="num">1</span>Floor Layout</button>
+  <button class="nb" onclick="showScreen(1)"><span class="num">2</span>Process Flow</button>
+  <button class="nb" onclick="showScreen(2)"><span class="num">3</span>ProPlanner Integration</button>
+</div>
+<div class="nav-r">
+  <span class="nt" style="background:var(--gd);color:#fff">CNH America LLC</span>
+  <span class="nt" style="background:#5c3a10;color:var(--ob)">DRAFT</span>
+</div>
 </div>
 
-<div class="detail-panel" id="detailPanel"></div>
-<div class="project-concerns" id="projectConcerns"></div>
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 1: FLOOR LAYOUT                 -->
+<!-- ═══════════════════════════════════════ -->
+<div class="scr act" id="scr0">
+<h2 style="color:var(--g);font-size:18px;margin-bottom:4px;border:none;padding:0">Controls Engineering Reference</h2>
+<p style="font-size:11px;color:var(--ts);margin-bottom:10px">Cardinal directions corrected per CNH layout | Click station for details</p>
+
+<div class="sg" id="s1stats"></div>
+<div class="fb" id="s1filters"></div>
+
+<div class="card" style="padding:10px">
+<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:10px;color:var(--tm)">
+<span>Click station blocks for controls details</span>
+<span style="color:var(--tp)">↑S ↓N ←E W→</span>
+</div>
+<svg id="floorMap" viewBox="-8 -12 160 88" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:580px;display:block"></svg>
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:9px">
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#3b82f6;display:inline-block"></span><span style="color:var(--ts)">PLC Station</span></span>
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#a855f7;display:inline-block"></span><span style="color:var(--ts)">Promess</span></span>
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#22d3ee;display:inline-block"></span><span style="color:var(--ts)">Cognex</span></span>
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#14b8a6;display:inline-block"></span><span style="color:var(--ts)">Point I/O</span></span>
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#475569;display:inline-block"></span><span style="color:var(--ts)">No PLC</span></span>
+<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:10px;border-radius:2px;background:#dc2626;display:inline-block"></span><span style="color:var(--ts)">Anomaly</span></span>
+</div>
+</div>
+<div class="dp" id="s1detail"></div>
+
+<!-- Project concerns -->
+<div class="card d" id="s1concerns"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 2: PROCESS FLOW                 -->
+<!-- ═══════════════════════════════════════ -->
+<div class="scr" id="scr1">
+<h2 style="color:var(--g);font-size:18px;margin-bottom:4px;border:none;padding:0">Process Flow Charts</h2>
+<p style="font-size:11px;color:var(--ts);margin-bottom:10px">Assembly sequences from CNH SOW with sub-assembly weights | Select housing type below</p>
+
+<div style="display:flex;gap:4px;margin-bottom:0">
+<button class="flow-tab act" onclick="showFlow(0)">Center Housing (Mainline)</button>
+<button class="flow-tab" onclick="showFlow(1)">Front Housing</button>
+<button class="flow-tab" onclick="showFlow(2)">Rear Housing</button>
+</div>
+
+<!-- CENTER HOUSING FLOW -->
+<div class="flow-container" id="flow0">
+<div class="g2" style="margin-bottom:10px">
+<div>
+<h3 style="color:var(--g);font-size:14px">Center Housing Assembly — Mainline Flow</h3>
+<p style="font-size:11px;color:var(--ts);margin-top:4px">Housing P/N 92228185 | Start: 428.7 Kg | Final: ~1,239.8 Kg | 3 Mainline Stations + 9 Sub-Assembly Cells</p>
+</div>
+<div style="text-align:right">
+<span class="tg tg-b">85 MIN CYCLE</span><span class="tg tg-o">7 CARTS</span><span class="tg tg-g">7 PRESSES</span>
+</div>
+</div>
+<div id="centerFlow"></div>
+</div>
+
+<!-- FRONT HOUSING FLOW -->
+<div class="flow-container" id="flow1" style="display:none">
+<div class="g2" style="margin-bottom:10px">
+<div>
+<h3 style="color:var(--g);font-size:14px">Front Housing Assembly — West Side</h3>
+<p style="font-size:11px;color:var(--ts);margin-top:4px">Housing P/N 92228181 | Start: 378 Kg | Final: 496 Kg | 10 Gear Sub-Assemblies + 4 Shim Measurements</p>
+</div>
+<div style="text-align:right"><span class="tg tg-b">85 MIN CYCLE</span><span class="tg tg-g">PROMESS 40kN</span><span class="tg tg-p">4 LVDTs</span></div>
+</div>
+<div id="frontFlow"></div>
+</div>
+
+<!-- REAR HOUSING FLOW -->
+<div class="flow-container" id="flow2" style="display:none">
+<div class="g2" style="margin-bottom:10px">
+<div>
+<h3 style="color:var(--g);font-size:14px">Rear Housing Assembly — North-West Side</h3>
+<p style="font-size:11px;color:var(--ts);margin-top:4px">Housing P/N 92228189 | Start: 424 Kg | Final: 522 Kg | Roll-Over Device + CVT Output Press</p>
+</div>
+<div style="text-align:right"><span class="tg tg-b">85 MIN CYCLE</span><span class="tg tg-g">PROMESS 40kN</span><span class="tg tg-o">ROLL-OVER</span></div>
+</div>
+<div id="rearFlow"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- SCREEN 3: PROPLANNER INTEGRATION       -->
+<!-- ═══════════════════════════════════════ -->
+<div class="scr" id="scr2">
+<h2 style="color:var(--g);font-size:18px;margin-bottom:4px;border:none;padding:0">ProPlanner ↔ PLC Integration</h2>
+<p style="font-size:11px;color:var(--ts);margin-bottom:10px">TCP/IP Socket — ASCII String Protocol | PLC = Server, ProPlanner = Client | Based on CNH Reference Code</p>
+
+<div class="card s">
+<h3 style="color:var(--gb);font-size:13px">Resolved Questions</h3>
+<div class="rv"><strong>Q1:</strong> ASCII string protocol, MID() parsing. <strong>Q2:</strong> PLC=Server, ProPlanner=Client. <strong>Q3:</strong> No storage — OPTIX recipe managers. <strong>Q5:</strong> ProPlanner (not Pivotware). <strong>Q6:</strong> ProPlanner owns serial tracking. <strong>Q8:</strong> Pass/fail only.</div>
+</div>
+
+<div class="sd"></div>
+
+<!-- Socket architecture -->
+<div class="card">
+<h2 style="color:var(--g);font-size:15px">Socket Architecture</h2>
+<table>
+<tr><th>MWES PLC (Server)</th><th>IP</th><th>Port</th><th>ProPlanner</th><th>Functions</th><th>Complexity</th></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-01: Station #1</td><td class="mo">192.168.x.11</td><td class="mo">5000</td><td>PP-ST1</td><td>Pressure decay, Shift/spin</td><td><span class="tg tg-o">HIGH</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-02: Mid-Plate</td><td class="mo">192.168.x.12</td><td class="mo">5000</td><td>PP-MP</td><td>Press, Vision, Torque</td><td><span class="tg tg-o">HIGH</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-03: Shaft</td><td class="mo">192.168.x.13</td><td class="mo">5000</td><td>PP-SH</td><td>Press, Vision</td><td><span class="tg tg-g">LOW</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-04: S12/FP</td><td class="mo">192.168.x.14</td><td class="mo">5000</td><td>PP-FP</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-05: Pump Drive</td><td class="mo">192.168.x.15</td><td class="mo">5000</td><td>PP-PD</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-07: Front Hsg</td><td class="mo">192.168.x.17</td><td class="mo">5000</td><td>PP-FH</td><td>Press, Shim, Roll-over</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
+<tr><td style="color:var(--g);font-weight:600">PLC-08: Rear Hsg</td><td class="mo">192.168.x.18</td><td class="mo">5000</td><td>PP-RH</td><td>Press, Roll-over</td><td><span class="tg tg-o">HIGH</span></td></tr>
+<tr style="background:var(--nd)"><td style="color:var(--tm)">PLC-06: Ring Gear</td><td class="mo" style="color:var(--tm)">—</td><td style="color:var(--tm)">—</td><td style="color:var(--tm)">NONE</td><td style="color:var(--tm)">No ProPlanner</td><td><span class="tg tg-gr">N/A</span></td></tr>
+</table>
+</div>
+
+<div class="sd"></div>
+
+<!-- StepNum commands -->
+<div class="card w">
+<h2 style="color:var(--g);font-size:15px">StepNum Command Definitions</h2>
+<p style="font-size:11px;color:var(--ts);margin-bottom:6px">1–4 from reference code. 5–9 are MWES proposals for C13 — require CNH confirmation.</p>
+<table>
+<tr><th>Step</th><th>Command</th><th>Src</th><th>Payload</th><th>PLC Response</th><th>Stations</th></tr>
+<tr><td style="color:#f87171;font-weight:700;font-size:14px;text-align:center;font-family:Oswald">1</td><td style="font-family:Oswald;font-size:11px">ABORT</td><td><span class="tg tg-g">REF</span></td><td>None</td><td>None</td><td>All</td></tr>
+<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">2</td><td style="font-family:Oswald;font-size:11px">CAMERA_JOB</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos6 L4: Job ID</td><td class="mo">JOB;COMPLETE; / CAM;OFFLINE;</td><td>MP, Shaft, S12, PD</td></tr>
+<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">3</td><td style="font-family:Oswald;font-size:11px">CAMERA_TRIGGER</td><td><span class="tg tg-g">REF</span></td><td>None</td><td class="mo">PIC;PASS; / PIC;FAIL;</td><td>MP, Shaft, S12, PD</td></tr>
+<tr><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">4</td><td style="font-family:Oswald;font-size:11px">PRESS_CHECK</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos5 L5: Dist<br>Pos11 L6: Tol<br>Pos15 L6: Step</td><td class="mo">PRESS;PASS;dist;step;<br>PRESS;FAIL;SHORT;dist;step;</td><td>All 7 presses</td></tr>
+<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">5</td><td style="font-family:Oswald;font-size:11px">PRESSURE_DECAY</td><td><span class="tg tg-o">C13</span></td><td class="mo">PSI, Tol, Hold</td><td class="mo">DECAY;PASS;psi;step;</td><td>Stn #1 only</td></tr>
+<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">6</td><td style="font-family:Oswald;font-size:11px">SHIFT_SPIN</td><td><span class="tg tg-o">C13</span></td><td class="mo">RPM, Valves, Step</td><td class="mo">SPIN;PASS;step;</td><td>Stn #1 only</td></tr>
+<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">7</td><td style="font-family:Oswald;font-size:11px">SHIM_MEASURE</td><td><span class="tg tg-o">C13</span></td><td class="mo">Device#, Step</td><td class="mo">SHIM;dev;val;shim;step;</td><td>Front Hsg only</td></tr>
+<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">8</td><td style="font-family:Oswald;font-size:11px">ROLLOVER_POS</td><td><span class="tg tg-o">C13</span></td><td class="mo">Angle, Step</td><td class="mo">ROLL;PASS;angle;step;</td><td>Front/Rear Hsg</td></tr>
+<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">9</td><td style="font-family:Oswald;font-size:11px">CONVEYOR_CMD</td><td><span class="tg tg-o">C13</span></td><td class="mo">Zone, Cmd, Step</td><td class="mo">CONV;PASS;zone;step;</td><td>Stn1(opt), FH, RH</td></tr>
+</table>
+</div>
+
+<div class="sd"></div>
+
+<!-- Sequence diagram -->
+<div class="card">
+<h2 style="color:var(--g);font-size:15px">Typical Sequence — Press Station</h2>
+<div class="mb">ProPlanner (Client)                      PLC (Server)
+    │                                           │
+    │── "xxx2000102" ──────────────────────────► │  StepNum=2, Job=0102
+    │  ◄── "JOB;COMPLETE;" ────────────────────  │
+    │── "xxx3" ────────────────────────────────► │  StepNum=3 (trigger)
+    │  ◄── "PIC;PASS;" ───────────────────────   │  Cognex result=1
+    │── "xxx4254000050000000001" ───────────────► │  StepNum=4: 25.4mm ±0.05
+    │  ◄── "PRESS;PASS;254023;000001;" ────────  │  Reached 25.4023mm
+    │  [ProPlanner sequences torque tools       │
+    │   independently — no socket msg]          │</div>
+</div>
+
+<div class="sd"></div>
+
+<!-- Per-station mapping -->
+<div class="card">
+<h2 style="color:var(--g);font-size:15px">Per-Station Message Mapping</h2>
+<p style="font-size:11px;color:var(--ts);margin-bottom:8px">Click to expand command/response details.</p>
+<div id="s3stations"></div>
+</div>
+
+<div class="sd"></div>
+
+<!-- Open questions -->
+<div class="card w">
+<h2 style="color:var(--g);font-size:15px">Remaining Open Questions</h2>
+<table>
+<tr><th>#</th><th>Status</th><th>Question</th><th>Impact</th></tr>
+<tr><td>4</td><td><span class="tg tg-r">OPEN</span></td><td>Does PLC gate part release or ProPlanner independently releases?</td><td>Cart movement</td></tr>
+<tr><td>7</td><td><span class="tg tg-r">OPEN</span></td><td>Part tracking across no-PLC stations?</td><td>Traceability</td></tr>
+<tr><td>9</td><td><span class="tg tg-o">OPEN</span></td><td>ProPlanner sends setpoints or PLC owns via OPTIX recipe?</td><td>Recipe architecture</td></tr>
+<tr><td>11</td><td><span class="tg tg-o">OPEN</span></td><td>Can ProPlanner support extended StepNums 5–9?</td><td>C13 equipment</td></tr>
+<tr><td>12</td><td><span class="tg tg-o">OPEN</span></td><td>TCP port confirm 5000?</td><td>Socket config</td></tr>
+<tr><td>13</td><td><span class="tg tg-o">OPEN</span></td><td>Rear housing torque tool count?</td><td>Traffic sizing</td></tr>
+</table>
+</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+<div class="footer-l">MWES — Midwest Engineered Systems</div>
+<div class="footer-t">Innovation Through Automation | W238N1800 Rockwood Dr, Waukesha, WI 53188 | mwes.com</div>
 </div>
 
 <script>
-// Layout: viewBox 160 wide x 88 tall (with padding)
-// Row 1 (SOUTH, y=2):  sub-assy stations feeding Stn1 area
-// Row 2 (MAINLINE, y=28): Stn1, Stn2, Stn3
-// Row 3 (NORTH, y=54): sub-assy stations feeding Stn2/3 area
-// Right side (WEST): Front Housing + Rear Housing
-
-const BW=16, BH=11, GAP=4; // block width, height, gap
-
-const LOCS=[
-// === ROW 1: SOUTH (top) — Sub-assemblies ===
-{id:"shaft",name:"Shaft Assembly — S18/S21/S25",zone:"Sub-Assembly — South",
-x:4,y:2,w:BW,h:BH,color:"#7c3aed",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
-promessModel:"EMAP-40/350/200 (40kN, 9,000 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"27,500 N (6,182 lbs)",promessFrame:"C-Frame with lower press fixture drawer",
-cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",
-torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["C-Frame press with lower fixture drawer","Promess EMAP-40 (40kN)","Cognex 3816M vision","2 tooling racks with position sensors","Seal ring alignment tool"],
-concerns:["Fixture drawer actuation mechanism TBD — servo or pneumatic?","20+ potential discrete inputs for tool position verification across 3 shaft types","PLC recipe management for S18 vs S21 vs S25 force profiles","No torque tools but Pivotware I/O present — what does Pivotware control here?"],
-cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 40kN\nCognex Vision\n3 Shaft Recipes"},
-
-{id:"s12-fp",name:"S12 & Front Plate Assembly",zone:"Sub-Assembly — South",
-x:24,y:2,w:BW,h:BH,color:"#7c3aed",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess + auxiliary Kinetix servos",network:"Ethernet/IP",
-promessModel:"EMAP-60/330/200 (60kN) — LARGEST ON LINE",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"37,000 N (8,318 lbs)",promessFrame:"H-Frame with DUAL auxiliary axes",
-cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",
-torqueTools:6,torqueRange:"3.5–400 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["H-Frame press — LARGEST (60kN)","Aux axis #1: Press actuator (ball screw/servo)","Aux axis #2: Fixture positioning (ball screw/servo)","Cognex 3816M vision","Fork assembly fixture","S12 rolling torque test device (customer)"],
-concerns:["CRITICAL: 3 coordinated axes — Promess main + 2 auxiliary. Who controls aux axes?","If Kinetix drives aux axes, need CompactLogix 5380 minimum for multi-axis","S12 rolling torque test device (customer) — interface spec needed","HIGHEST I/O COUNT station — size PLC chassis accordingly","400 Nm max torque tool — confirm Pivotware controller compatibility"],
-cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 60kN\nLARGEST PRESS + Dual Aux\nCognex | 6 Torque Tools"},
-
-{id:"pump-drive",name:"Pump Drive Plate & Clutch",zone:"Sub-Assembly — South",
-x:44,y:2,w:BW,h:BH,color:"#9333ea",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess + dual aux axes",network:"Ethernet/IP",
-promessModel:"EMAP-30/350/200 (30kN, 6,750 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"22,500 N (5,058 lbs)",promessFrame:"H-Frame with dual auxiliary axes",
-cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",
-torqueTools:7,torqueRange:"12–338 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["H-Frame press with dual aux axes","Promess EMAP-30 (30kN)","Cognex 3816M vision","Clutch A & B assembly ops","S33 shaft assembly ops"],
-concerns:["Dual aux axes — same architecture question as S12/Front Plate","Multiple assembly recipes (S33, pump plate, clutch A, B, gear bearing)","7 torque tools across multiple clutch operations — complex Pivotware sequencing","Widest variety of press operations — tool change verification critical"],
-cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 30kN\nCognex + Dual Aux Axes\n7 Torque Tools"},
-
-{id:"top-side",name:"Top & Side Plate Sub-Assembly",zone:"Sub-Assembly — South",
-x:64,y:2,w:BW,h:BH,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:2,torqueRange:"23 & 10 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Table with fixture","2 customer torque tools"],
-concerns:["No MWES controls — simplest station","Low torque, minimal fixturing"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimplest Station"},
-
-// === ROW 2: MAINLINE (middle, y=28) ===
-{id:"st1",name:"Station #1 — Mainline (Center Housing)",zone:"Mainline",
-x:14,y:28,w:BW,h:BH,color:"#2563eb",
-hasPlc:true,hasHmi:true,hasPromess:false,hasCognex:false,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
-drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",
-torqueTools:7,torqueRange:"58–265 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Incoming part rack with sensor lights and Pivotware I/O",
-pwInterface:"UNDEFINED — Major open question",
-equipment:["Clutch circuit pressure decay test (analog pressure, timed sequence)","Shift & spin test (servo-motor + shaft, 3 pneumatic valves, magnet shift sensors)","Housing buffer conveyor — OPTIONAL ($81.2K): 3 zones, VFD-controlled"],
-concerns:["CRITICAL: Pressure decay test requires analog input + timed pass/fail logic — confirm PLC I/O count","Shift & spin test requires Kinetix servo axis — confirm sizing","3 pneumatic valves need discrete outputs + position feedback","Magnet shift sensor signal type TBD (discrete? analog?)","Pivotware interface: 7 torque tools customer-supplied — who sequences them?","SCOPE CONFLICT: 'no data collection' but tests inherently generate pass/fail data"],
-cat:"plc-hmi",
-subLabel:"PLC + HMI\n7 Torque Tools\nPressure Decay + Spin Test"},
-
-{id:"st2",name:"Station #2 — Mainline (Sub-Assy Install)",zone:"Mainline",
-x:38,y:28,w:BW,h:BH,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:12,torqueRange:"45–2,000 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED — Pivotware owns ALL sequencing",
-equipment:["Guide rods for hydrostat installation","Table for amogel grease","12 customer torque tools (45–2,000 Nm!)"],
-concerns:["NO MWES PLC — 100% Pivotware-controlled","2,000 Nm max torque — confirm Pivotware compatibility","12 torque tools — HIGHEST COUNT, maximum Pivotware complexity","MWES has ZERO visibility into this station","Multiple heavy sub-assemblies: hydrostat 174.3 Kg, pump drive 205 Kg, ring gear 34.9 Kg"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n12 Torque Tools (MOST)\n2,000 Nm Max Torque"},
-
-{id:"st3",name:"Station #3 — Mainline (Final Assembly)",zone:"Mainline",
-x:62,y:28,w:BW,h:BH,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:8,torqueRange:"10–325 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Sealant application (47606598)","Assembly guide pins — front (2) & rear (2) housing","Special tool to rotate fan pump drive gear","8 customer torque tools"],
-concerns:["NO MWES PLC — Pivotware-controlled","Front housing (496 Kg) + rear housing (522 Kg) join here — heaviest ops","Sealant application quality — who verifies?","Final assy ~1,239.8 Kg on cart at all orientations","No quality gate / sign-off PLC logic at final station"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n8 Torque Tools\nFinal Assy 1,240 Kg"},
-
-// === ROW 3: NORTH (bottom, y=54) — Sub-assemblies ===
-{id:"mid-plate",name:"Mid-Plate Assembly & S13",zone:"Sub-Assembly — North",
-x:4,y:54,w:BW,h:BH,color:"#7c3aed",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
-promessModel:"EMAP-20/350/200 (20kN, 4,500 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"14,500 N (3,260 lbs)",promessFrame:"H-Frame with pneumatic fixture shuttle",
-cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED — via CN process",
-torqueTools:4,torqueRange:"20–338 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Incoming part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["H-Frame press with pneumatic fixture shuttle","Promess EMAP-20 servo press (20kN)","Cognex 3816M vision camera","Pawl arm measurement (2 gauge blocks)","Rocker arm station (manual arbor press)","Tooling support rack with position sensors"],
-concerns:["Promess Ethernet/IP — confirm IP scheme and PLC handshake","UltraPRO generates force/distance curves — CNH expects data stored?","Cognex programming NOT included — budget risk for CN hours","Cognex integration: pass/fail gating via PLC or standalone?","Pneumatic fixture shuttle needs discrete I/O for extend/retract","Tooling rack position sensors — how many discrete inputs?"],
-cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 20kN\nCognex Vision\n4 Torque Tools"},
-
-{id:"shift-cyl",name:"Shift Cylinder Sub-Assembly",zone:"Sub-Assembly — North",
-x:24,y:54,w:BW,h:BH,color:"#dc2626",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Arbor press station","Functional test bench (pressure sensor)","Electronic bore measurement with PLC feedback"],
-concerns:["RED FLAG: Controls N/A but has 'bore measurement with PLC feedback'","Which PLC does bore gauge feed? Mid-plate? Needs its own?","RECOMMEND: Point I/O drop from mid-plate PLC","Functional test bench pressure sensor — manual or PLC?","No drawings provided — design TBD, controls scope could expand"],
-cat:"anomaly",
-subLabel:"⚠ ANOMALY\nControls N/A but needs\nPLC for bore measurement\nRESOLUTION REQUIRED"},
-
-{id:"hydrostat",name:"Hydrostat Sub-Assembly",zone:"Sub-Assembly — North",
-x:44,y:54,w:BW,h:BH,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:3,torqueRange:"57–280 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["2 assembly/fixture carts","Hand-held pneumatic press with balancer"],
-concerns:["No MWES controls — Pivotware only","Pneumatic press: no force monitoring","Hydrostat 174.3 Kg — verify cart rating"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n3 Torque Tools\nPneumatic Press (manual)"},
-
-{id:"ring-gear",name:"Ring Gear & Misc Sub-Assembly",zone:"Sub-Assembly — North",
-x:64,y:54,w:BW,h:BH,color:"#9333ea",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
-promessModel:"EMAP-30/350/200 (30kN, 6,750 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"20,000 N (4,496 lbs)",promessFrame:"C-Frame with lower fixture drawer",
-torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",
-pivotware:"NO",pwInterface:"N/A",
-equipment:["C-Frame press with lower fixture drawer","Promess EMAP-30 (30kN)","Tooling rack with position sensors"],
-concerns:["No Cognex camera — only press station without vision. Intentional?","Fixture drawer actuation TBD","Multiple gear recipes (G34, G31, G41, ring gear)","Simplest PLC station — press-driven only, no torque tools or Pivotware"],
-cat:"plc-hmi-promess",
-subLabel:"PLC + HMI + Promess 30kN\nNO Vision Camera\nSimplest PLC Station"},
-
-{id:"planetary",name:"Planetary & Misc Sub-Assembly",zone:"Sub-Assembly — North",
-x:84,y:54,w:BW,h:BH,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:2,torqueRange:"8.9 & 57.3 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Table with gear fixture","3 outer gear nests with dummy pins","Air hammer tools"],
-concerns:["No MWES controls — simple manual station","Low torque — straightforward Pivotware"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimple Manual Station"},
-
-// === RIGHT SIDE (WEST): Housing areas ===
-{id:"front-hsg",name:"Front Housing Assembly",zone:"Front Housing — West",
-x:104,y:20,w:BW+4,h:BH+2,color:"#0d9488",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:true,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
-drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",
-promessModel:"EMAP-40/330/200 (40kN, 9,000 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"31,500 N (7,081 lbs)",promessFrame:"H-Frame with aux axis fixture positioning",
-pointIO:"Junction boxes with AB Point I/O — conveyor control",
-torqueTools:9,torqueRange:"37–265 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["H-Frame press with aux axis fixture positioning","Promess EMAP-40 (40kN)","10 lower gear nests, 14 upper tools","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 8 ft","Roll-over device (0°/90°/180°)","4 LVDT shim measurement devices","Point I/O junction boxes","MFD rolling torque test device (customer)"],
-concerns:["ONLY STATION WITH POINT I/O — how many nodes? What's on Point I/O vs main chassis?","Roll-over device actuation — VFD or servo? 3 position stops with confirmation","4 LVDT shim measurements = 4 analog inputs — on Point I/O or main chassis?","CRITICAL: Shim values are quality data — conflicts with 'no data collection'","10 gear sub-assy operations — most tool changes of any press station","MOST COMPLEX controls station on the entire line","Housing 378 Kg — roll-over and conveyors sized with safety factor?"],
-cat:"plc-hmi-promess-pointio",
-subLabel:"PLC+HMI+Promess 40kN\nPoint I/O + 4 LVDTs\nRoll-Over + Conveyors\n9 Torque Tools\nMOST COMPLEX STATION"},
-
-{id:"rear-hsg",name:"Rear Housing Assembly",zone:"Rear Housing — West",
-x:104,y:42,w:BW+4,h:BH+2,color:"#f59e0b",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
-drives:"PowerFlex VFDs",network:"Ethernet/IP",
-promessModel:"EMAP-40/330/200 (40kN, 8,993 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"30,000 N",promessFrame:"C-Frame with lower fixture drawer",
-torqueTools:"Multiple (unspecified count)",torqueRange:"Various",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["C-Frame press with fixture drawer","Promess EMAP-40 (40kN)","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 12 ft","Roll-over device (0°/90°/180°)","Tooling rack with position sensors","Output shaft rolling torque test (customer)","Charge pump addition (OPTION — TBD)"],
-concerns:["Identical conveyors to front housing but NO Point I/O specified — inconsistency","Roll-over device same control questions as front housing","Rolling torque test device interface undefined","Charge pump option could add I/O and programming scope","Torque tool count not specified — confirm with CNH","Housing 424 Kg + sub-assemblies on roll-over"],
-cat:"plc-hmi-promess",
-subLabel:"PLC+HMI+Promess 40kN\nRoll-Over + Conveyors\nNO Point I/O\n(inconsistency w/ Front Hsg?)"}
-];
-
-const STATS_DATA=[
-{v:"8",l:"CompactLogix",s:"PLCs",c:"#3b82f6"},{v:"8",l:'OPTIX 12"',s:"HMI Panels",c:"#60a5fa"},
-{v:"7",l:"Promess",s:"Servo Presses",c:"#a855f7"},{v:"4",l:"Cognex 3816M",s:"Vision Cameras",c:"#22d3ee"},
-{v:"1",l:"Point I/O",s:"Remote Racks",c:"#14b8a6"},{v:"56+",l:"Torque Tools",s:"Customer/PW",c:"#f97316"},
-{v:"11+",l:"Pivotware",s:"I/O Points",c:"#16a34a"},{v:"6",l:"No-PLC",s:"Stations",c:"#64748b"}
-];
-
-const FILTERS_DATA=[
-{key:"all",label:"All Stations"},{key:"hasPlc",label:"Has PLC"},{key:"noPlc",label:"No PLC"},
-{key:"hasPromess",label:"Promess Press"},{key:"hasCognex",label:"Cognex Vision"},
-{key:"hasPointIO",label:"Point I/O"},{key:"anomaly",label:"Anomalies/Risks"}
-];
-
-const PROJ_CONCERNS=[
-{t:"OPTIX Token Licensing",d:'All proposals: "token options NOT included, to be reviewed with customer." 8 panels × unknown cost = unbudgeted. Must resolve before PO.',s:"high"},
-{t:"Pivotware Interface — UNDEFINED",d:"11+ stations have Pivotware I/O. Zero specification for MWES PLC ↔ Pivotware handshake. Protocol, signals, initiator all TBD. #1 controls risk.",s:"high"},
-{t:"Data Collection Exclusion vs. Reality",d:"Proposals exclude data collection. But 7 Promess UltraPRO presses, 4 Cognex cameras, pressure decay tests, LVDTs, and 56+ torque tools all generate quality data. CNH almost certainly expects traceability.",s:"high"},
-{t:"Cognex Camera Programming",d:"4 cameras, zero programming included. 'Viability TBD once parts available.' Each camera could be 40–80 hrs. No budget estimate.",s:"medium"},
-{t:"Shift Cylinder Bore Gauge PLC Conflict",d:"Station listed Controls: N/A but needs 'electronic bore measurement with PLC feedback.' Recommend Point I/O to mid-plate PLC.",s:"medium"},
-{t:"Rear Housing Point I/O Gap",d:"Front housing has Point I/O for conveyors. Rear housing identical conveyors but no Point I/O specified. Oversight?",s:"medium"},
-{t:"CompactLogix Processor Selection",d:"S12/Front Plate and Pump Drive have dual auxiliary servo axes. If Kinetix-driven, need 5380 series minimum. Cost impact significant.",s:"medium"},
-{t:"Ethernet/IP Network Architecture",d:"8 PLCs + 7 Promess + 4 Cognex + Point I/O + VFDs + 11 Pivotware nodes = complex network. Topology, IP scheme, VLANs needed early.",s:"medium"},
-{t:"No-PLC Station Visibility Gap",d:"6 stations have no MWES PLC. Zero visibility into operations or quality. If CNH expects line-wide tracking, this is a gap.",s:"low"}
-];
-
-let currentFilter="all",selectedId=null;
-
-function init(){renderStats();renderFilters();renderMap();renderProjectConcerns()}
-
-function renderStats(){
-  document.getElementById("statsGrid").innerHTML=STATS_DATA.map(s=>
-    `<div class="stat-card" style="border-left:3px solid ${s.c}"><div class="stat-val" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div><div class="stat-sub">${s.s}</div></div>`
-  ).join("");
+// ═══════ SCREEN NAVIGATION ═══════
+function showScreen(n){
+  document.querySelectorAll('.scr').forEach((s,i)=>{s.classList.toggle('act',i===n)});
+  document.querySelectorAll('.nb').forEach((b,i)=>{b.classList.toggle('act',i===n)});
+  window.scrollTo(0,0);
 }
 
-function renderFilters(){
-  document.getElementById("filterBar").innerHTML=FILTERS_DATA.map(f=>{
-    let cnt=f.key==="all"?LOCS.length:f.key==="noPlc"?LOCS.filter(l=>!l.hasPlc).length:f.key==="anomaly"?LOCS.filter(l=>l.cat==="anomaly"||l.concerns.some(c=>c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT"))).length:LOCS.filter(l=>l[f.key]).length;
-    return `<button class="filter-btn ${currentFilter===f.key?"active":""}" onclick="setFilter('${f.key}')">${f.label} (${cnt})</button>`;
+// ═══════ SCREEN 1: FLOOR LAYOUT DATA ═══════
+const BW=16,BH=11;
+const LOCS=[
+{id:"shaft",nm:"Shaft S18/S21/S25",z:"Sub-Assy South",x:4,y:2,w:BW,h:BH,c:"#7c3aed",plc:1,hmi:1,pr:1,cx:1,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12"',prM:"EMAP-40 (40kN)",cxM:"3816M",tt:0,tr:"N/A",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 40kN\nCognex Vision\n3 Shaft Recipes",
+eq:["C-Frame press w/ fixture drawer","Promess EMAP-40","Cognex 3816M","2 tooling racks","Seal ring tool"],
+con:["Fixture drawer actuation TBD","20+ discrete inputs for tool verification","Recipe mgmt S18/S21/S25","Pivotware role unclear — no torque tools"]},
+{id:"s12fp",nm:"S12 & Front Plate",z:"Sub-Assy South",x:24,y:2,w:BW,h:BH,c:"#7c3aed",plc:1,hmi:1,pr:1,cx:1,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12"',prM:"EMAP-60 (60kN) LARGEST",cxM:"3816M",tt:6,tr:"3.5–400 Nm",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 60kN\nLARGEST PRESS+Dual Aux\nCognex | 6 Tools",
+eq:["H-Frame LARGEST (60kN)","Dual aux axes","Cognex 3816M","Fork fixture","S12 torque test (cust)"],
+con:["CRITICAL: 3 coordinated axes","Need 5380 minimum if Kinetix aux","HIGHEST I/O COUNT","S12 torque test interface TBD"]},
+{id:"pd",nm:"Pump Drive & Clutch",z:"Sub-Assy South",x:44,y:2,w:BW,h:BH,c:"#9333ea",plc:1,hmi:1,pr:1,cx:1,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12"',prM:"EMAP-30 (30kN)",cxM:"3816M",tt:7,tr:"12–338 Nm",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 30kN\nCognex+Dual Aux\n7 Torque Tools",
+eq:["H-Frame w/ dual aux","Promess EMAP-30","Cognex 3816M","Clutch A&B ops"],
+con:["Dual aux same as S12/FP","5+ recipe variants","Complex Pivotware sequencing"]},
+{id:"ts",nm:"Top/Side Plate Sub",z:"Sub-Assy South",x:64,y:2,w:BW,h:BH,c:"#475569",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:2,tr:"23 & 10 Nm",pw:"YES",cat:"n",sl:"NO PLC — ProPlanner Only\n2 Torque Tools\nSimplest Station",
+eq:["Table with fixture","2 torque tools"],con:["No MWES controls"]},
+{id:"st1",nm:"Station #1 Mainline",z:"Mainline",x:14,y:28,w:BW,h:BH,c:"#2563eb",plc:1,hmi:1,pr:0,cx:0,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12" swing arm',prM:"",cxM:"",tt:7,tr:"58–265 Nm",pw:"YES",cat:"p",sl:"PLC+HMI\n7 Torque Tools\nDecay+Spin Tests",
+eq:["Pressure decay test","Shift/spin test (servo)","Buffer conveyor (opt)"],
+con:["CRITICAL: Analog pressure I/O","Kinetix servo for spin test","SCOPE CONFLICT: no data collection vs test data"]},
+{id:"st2",nm:"Station #2 Mainline",z:"Mainline",x:38,y:28,w:BW,h:BH,c:"#475569",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:12,tr:"45–2,000 Nm",pw:"YES",cat:"n",sl:"NO PLC — ProPlanner Only\n12 Tools (MOST)\n2,000 Nm Max",
+eq:["Guide rods","Grease table","12 torque tools"],con:["100% ProPlanner controlled","2,000 Nm max","ZERO MWES visibility"]},
+{id:"st3",nm:"Station #3 Mainline",z:"Mainline",x:62,y:28,w:BW,h:BH,c:"#475569",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:8,tr:"10–325 Nm",pw:"YES",cat:"n",sl:"NO PLC — ProPlanner Only\n8 Tools | Housing Join\nFinal Assy 1,240 Kg",
+eq:["Sealant application","Guide pins","8 torque tools"],con:["No PLC at final assy","Both housings join here","No quality gate"]},
+{id:"mp",nm:"Mid-Plate & S13",z:"Sub-Assy North",x:4,y:54,w:BW,h:BH,c:"#7c3aed",plc:1,hmi:1,pr:1,cx:1,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12"',prM:"EMAP-20 (20kN)",cxM:"3816M",tt:4,tr:"20–338 Nm",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 20kN\nCognex Vision\n4 Torque Tools",
+eq:["H-Frame w/ pneumatic shuttle","Promess EMAP-20","Cognex 3816M","Pawl measurement","Rocker arm station"],
+con:["Shuttle I/O for extend/retract","Cognex programming not included","UltraPRO data collection question"]},
+{id:"sc",nm:"Shift Cylinder Sub",z:"Sub-Assy North",x:24,y:54,w:BW,h:BH,c:"#dc2626",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:0,tr:"N/A",pw:"YES",cat:"a",sl:"⚠ ANOMALY\nControls N/A but needs\nPLC for bore gauge\nRESOLVE REQUIRED",
+eq:["Arbor press","Test bench","Bore gauge w/ PLC feedback"],
+con:["RED FLAG: N/A but needs PLC","Which PLC for bore gauge?","RECOMMEND: Point I/O to mid-plate"]},
+{id:"hy",nm:"Hydrostat Sub",z:"Sub-Assy North",x:44,y:54,w:BW,h:BH,c:"#475569",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:3,tr:"57–280 Nm",pw:"YES",cat:"n",sl:"NO PLC — ProPlanner Only\n3 Torque Tools\nPneumatic Press",
+eq:["2 fixture carts","Pneumatic press"],con:["No force monitoring","174.3 Kg verify cart"]},
+{id:"rg",nm:"Ring Gear & Misc",z:"Sub-Assy North",x:64,y:54,w:BW,h:BH,c:"#9333ea",plc:1,hmi:1,pr:1,cx:0,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12"',prM:"EMAP-30 (30kN)",tt:0,tr:"N/A",pw:"NO",cat:"p",sl:"PLC+HMI+Promess 30kN\nNO Vision | NO ProPlanner\nSimplest PLC Station",
+eq:["C-Frame w/ fixture drawer","Promess EMAP-30","Tooling rack"],
+con:["No Cognex — intentional?","No Pivotware — simplest PLC","Fixture drawer TBD"]},
+{id:"pl",nm:"Planetary Sub",z:"Sub-Assy North",x:84,y:54,w:BW,h:BH,c:"#475569",plc:0,hmi:0,pr:0,cx:0,pio:0,tt:2,tr:"8.9 & 57.3 Nm",pw:"YES",cat:"n",sl:"NO PLC — ProPlanner Only\n2 Torque Tools\nManual Station",
+eq:["Table w/ gear fixture","Air hammer tools"],con:["Simple manual station"]},
+{id:"fh",nm:"Front Housing",z:"Housing West",x:104,y:20,w:BW+4,h:BH+2,c:"#0d9488",plc:1,hmi:1,pr:1,cx:0,pio:1,plcM:"CompactLogix",hmiM:'OPTIX 12" swing arm',prM:"EMAP-40 (40kN)",pioM:"Point I/O junction boxes",tt:9,tr:"37–265 Nm",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 40kN\nPoint I/O+4 LVDTs\nRoll-Over+Conveyors\nMOST COMPLEX",
+eq:["H-Frame w/ aux axis","Promess EMAP-40","10 gear nests, 14 tools","Buffer conveyor","Roll-over 0/90/180°","4 LVDT shim devices","Point I/O"],
+con:["ONLY station w/ Point I/O","Roll-over actuation TBD","CRITICAL: Shim data vs no-collection","MOST COMPLEX station"]},
+{id:"rh",nm:"Rear Housing",z:"Housing West",x:104,y:42,w:BW+4,h:BH+2,c:"#f59e0b",plc:1,hmi:1,pr:1,cx:0,pio:0,plcM:"CompactLogix",hmiM:'OPTIX 12" swing arm',prM:"EMAP-40 (40kN)",tt:"TBD",tr:"Various",pw:"YES",cat:"p",sl:"PLC+HMI+Promess 40kN\nRoll-Over+Conveyors\nNO Point I/O (gap?)",
+eq:["C-Frame w/ fixture drawer","Promess EMAP-40","Conveyor","Roll-over 0/90/180°","Torque test (cust)"],
+con:["No Point I/O — inconsistency","Torque count TBD","Charge pump option"]}
+];
+
+const S1STATS=[{v:"8",l:"CompactLogix",s:"PLCs",c:"#3b82f6"},{v:"8",l:'OPTIX 12"',s:"HMIs",c:"#60a5fa"},{v:"7",l:"Promess",s:"Presses",c:"#a855f7"},{v:"4",l:"Cognex",s:"Vision",c:"#22d3ee"},{v:"1",l:"Point I/O",s:"Remote",c:"#14b8a6"},{v:"56+",l:"Torque",s:"Tools",c:"#f97316"},{v:"11+",l:"ProPlanner",s:"Stations",c:""},{v:"6",l:"No-PLC",s:"Stations",c:"#64748b"}];
+const S1FILTS=[{k:"a",l:"All"},{k:"p",l:"Has PLC"},{k:"n",l:"No PLC"},{k:"pr",l:"Promess"},{k:"cx",l:"Cognex"},{k:"pio",l:"Point I/O"},{k:"x",l:"Anomaly"}];
+const PCON=[{t:"OPTIX Token Licensing",d:"8 panels × unknown token cost = unbudgeted.",s:"h"},{t:"Data Collection vs Reality",d:"7 presses, 4 cameras, 56+ torque tools generate data. Proposals exclude collection.",s:"h"},{t:"Cognex Programming",d:"4 cameras, 0 programming. 40-80 hrs each via CN.",s:"m"},{t:"Shift Cyl Bore Gauge",d:"Controls N/A but needs PLC feedback. Recommend Point I/O to mid-plate.",s:"m"},{t:"Rear Housing Point I/O Gap",d:"Front has Point I/O, rear doesn't. Same conveyors.",s:"m"},{t:"Processor Selection",d:"S12/FP and Pump Drive dual aux axes may need 5380.",s:"m"}];
+
+let s1filter="a",s1sel=null;
+
+function initS1(){
+  document.getElementById("s1stats").innerHTML=S1STATS.map(s=>`<div class="sc2" style="border-left:3px solid ${s.c||'var(--g)'}"><div class="sv" style="color:${s.c||'var(--g)'}">${s.v}</div><div class="sl">${s.l}</div><div class="ss">${s.s}</div></div>`).join("");
+  renderS1Filters();renderS1Map();renderS1Concerns();
+}
+
+function renderS1Filters(){
+  document.getElementById("s1filters").innerHTML=S1FILTS.map(f=>{
+    let c=f.k==="a"?LOCS.length:f.k==="p"?LOCS.filter(l=>l.plc).length:f.k==="n"?LOCS.filter(l=>!l.plc).length:f.k==="pr"?LOCS.filter(l=>l.pr).length:f.k==="cx"?LOCS.filter(l=>l.cx).length:f.k==="pio"?LOCS.filter(l=>l.pio).length:LOCS.filter(l=>l.cat==="a").length;
+    return `<button class="fbtn ${s1filter===f.k?'act':''}" onclick="setS1F('${f.k}')">${f.l} (${c})</button>`;
   }).join("");
 }
 
-function setFilter(f){currentFilter=f;selectedId=null;renderFilters();renderMap();document.getElementById("detailPanel").classList.remove("visible")}
+function setS1F(f){s1filter=f;s1sel=null;renderS1Filters();renderS1Map();document.getElementById("s1detail").classList.remove("vis")}
 
-function getFiltered(){
+function getS1Filt(){
   return LOCS.filter(l=>{
-    if(currentFilter==="all")return true;
-    if(currentFilter==="hasPlc")return l.hasPlc;
-    if(currentFilter==="noPlc")return!l.hasPlc;
-    if(currentFilter==="anomaly")return l.cat==="anomaly"||l.concerns.some(c=>c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT"));
-    return l[currentFilter];
+    if(s1filter==="a")return true;if(s1filter==="p")return l.plc;if(s1filter==="n")return!l.plc;
+    if(s1filter==="pr")return l.pr;if(s1filter==="cx")return l.cx;if(s1filter==="pio")return l.pio;
+    return l.cat==="a"||l.con.some(c=>c.includes("CRITICAL")||c.includes("RED FLAG"));
   });
 }
 
-function renderMap(){
-  const svg=document.getElementById("floorMap");
-  const fl=getFiltered();const ids=new Set(fl.map(l=>l.id));
+function renderS1Map(){
+  const svg=document.getElementById("floorMap"),fl=getS1Filt(),ids=new Set(fl.map(l=>l.id));
   let h='';
+  h+=`<rect x="0" y="-1" width="85" height="${BH+4}" rx="2" fill="#1e1b4b" opacity=".2"/>`;
+  h+=`<rect x="0" y="26" width="85" height="${BH+4}" rx="2" fill="#172554" opacity=".2"/>`;
+  h+=`<rect x="0" y="52" width="105" height="${BH+4}" rx="2" fill="#1a2e05" opacity=".2"/>`;
+  h+=`<rect x="100" y="18" width="${BW+8}" height="40" rx="2" fill="#0c4a3e" opacity=".15"/>`;
+  h+=`<text x="42" y="-5" fill="var(--tm)" font-size="2" text-anchor="middle" font-weight="700" font-family="Oswald">SOUTH — SUB-ASSEMBLY</text>`;
+  h+=`<text x="42" y="24" fill="var(--tm)" font-size="2" text-anchor="middle" font-weight="700" font-family="Oswald">MAINLINE (EAST → WEST)</text>`;
+  h+=`<text x="52" y="50" fill="var(--tm)" font-size="2" text-anchor="middle" font-weight="700" font-family="Oswald">NORTH — SUB-ASSEMBLY & REAR HOUSING</text>`;
+  h+=`<text x="${104+(BW+4)/2}" y="16" fill="var(--tm)" font-size="1.8" text-anchor="middle" font-weight="700" font-family="Oswald">WEST — HOUSING</text>`;
+  h+=`<line x1="4" y1="26" x2="95" y2="26" stroke="#fbbf24" stroke-width=".5" stroke-dasharray="2,1.5"/>`;
+  h+=`<text x="50" y="25" fill="#fbbf24" font-size="1.4" text-anchor="middle" font-weight="600" font-family="Oswald">CART PATH (~200 FT) — 7 CARTS</text>`;
 
-  // Zone background bands
-  h+=`<rect x="0" y="-1" width="85" height="${BH+4}" rx="2" fill="#1e1b4b" opacity="0.25"/>`;
-  h+=`<rect x="0" y="${28-2}" width="85" height="${BH+4}" rx="2" fill="#172554" opacity="0.25"/>`;
-  h+=`<rect x="0" y="${54-2}" width="105" height="${BH+4}" rx="2" fill="#1a2e05" opacity="0.25"/>`;
-  h+=`<rect x="100" y="18" width="${BW+8}" height="40" rx="2" fill="#0c4a3e" opacity="0.2"/>`;
-
-  // Row labels
-  h+=`<text x="42" y="-5" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">SOUTH — Sub-Assembly Stations (Feeding Mainline)</text>`;
-  h+=`<text x="42" y="24" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">MAINLINE — Cart Path (EAST → WEST)</text>`;
-  h+=`<text x="52" y="50" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">NORTH — Sub-Assembly Stations & Rear Housing</text>`;
-  h+=`<text x="${104+(BW+4)/2}" y="16" fill="#64748b" font-size="2" text-anchor="middle" font-weight="700">WEST — Housing Assembly</text>`;
-
-  // Cardinal direction markers
-  h+=`<text x="-5" y="35" fill="#ef4444" font-size="3.5" font-weight="700">E</text>`;
-  h+=`<text x="142" y="35" fill="#ef4444" font-size="3.5" font-weight="700">W</text>`;
-  h+=`<text x="60" y="-9" fill="#ef4444" font-size="3.5" font-weight="700" text-anchor="middle">S</text>`;
-  h+=`<text x="60" y="72" fill="#ef4444" font-size="3.5" font-weight="700" text-anchor="middle">N</text>`;
-
-  // Cart path
-  h+=`<line x1="4" y1="26" x2="95" y2="26" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="2.5,1.5"/>`;
-  h+=`<text x="50" y="25" fill="#fbbf24" font-size="1.6" text-anchor="middle" font-weight="600">MAGNET TAPE CART PATH (~200 ft) — 7 CARTS — 48V Battery</text>`;
-
-  // Material flow arrows (sub-assy → mainline)
-  const arrows=[
-    // South subs down to mainline
-    {x1:12,y1:13,x2:20,y2:28,c:"#a78bfa",l:"Shafts"},
-    {x1:32,y1:13,x2:24,y2:28,c:"#a78bfa",l:"S12/FP 214.5Kg"},
-    {x1:52,y1:13,x2:44,y2:28,c:"#c084fc",l:"Pump Drv 205Kg"},
-    {x1:72,y1:13,x2:68,y2:28,c:"#c084fc",l:"Top/Side"},
-    // North subs up to mainline
-    {x1:12,y1:54,x2:20,y2:39,c:"#a78bfa",l:"Mid Plate 73.5Kg"},
-    {x1:32,y1:54,x2:24,y2:39,c:"#a78bfa",l:"Shift Cyl 3.2Kg"},
-    {x1:52,y1:54,x2:44,y2:39,c:"#c084fc",l:"Hydro 174.3Kg"},
-    {x1:72,y1:54,x2:52,y2:39,c:"#c084fc",l:"Ring Gear 34.9Kg"},
-    {x1:92,y1:54,x2:56,y2:39,c:"#c084fc",l:"Planetary 39.1Kg"},
-    // Housing → Station 3
-    {x1:104,y1:30,x2:78,y2:33,c:"#14b8a6",l:"Front Hsg 496Kg"},
-    {x1:104,y1:48,x2:78,y2:36,c:"#fbbf24",l:"Rear Hsg 522Kg"},
-  ];
-  arrows.forEach(a=>{
-    h+=`<line x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" stroke="${a.c}" stroke-width="0.5" stroke-dasharray="2,1.5" opacity="0.4"/>`;
-    const mx=(a.x1+a.x2)/2, my=(a.y1+a.y2)/2;
-    h+=`<text x="${mx+1}" y="${my-0.5}" fill="${a.c}" font-size="1.1" opacity="0.55">${a.l}</text>`;
-  });
-
-  // Render each station
   LOCS.forEach(l=>{
-    const vis=ids.has(l.id);const isSel=selectedId===l.id;
-    const fillColor=isSel?l.color:vis?l.color+"88":l.color+"15";
-    const strokeColor=isSel?"#f8fafc":l.cat==="anomaly"?"#ef4444":vis?l.color+"bb":l.color+"33";
-    const sw=isSel?0.8:l.cat==="anomaly"?0.6:0.3;
-    const sd=l.cat==="anomaly"?"2,1":"none";
-    const op=vis?1:0.15;
-
-    h+=`<g class="station-group" onclick="selectStation('${l.id}')" style="opacity:${op}">`;
-    // Invisible expanded hit area
+    const vis=ids.has(l.id),isSel=s1sel===l.id;
+    const fill=isSel?l.c:vis?l.c+"88":l.c+"15";
+    const stroke=isSel?"#f8fafc":l.cat==="a"?"#ef4444":vis?l.c+"bb":l.c+"33";
+    const sw=isSel?.8:l.cat==="a"?.6:.3;const op=vis?1:.15;
+    h+=`<g class="stg" onclick="selS1('${l.id}')" style="opacity:${op}">`;
     h+=`<rect x="${l.x-1}" y="${l.y-1}" width="${l.w+2}" height="${l.h+2}" fill="transparent"/>`;
-    // Visible fill
-    h+=`<rect class="station-fill" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="${fillColor}" opacity="0.9"/>`;
-    // Border
-    h+=`<rect class="station-border" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="none" stroke="${strokeColor}" stroke-width="${sw}" stroke-dasharray="${sd}"/>`;
-
-    // Station name (top of block)
-    const name=l.name.split("—")[0].trim();
-    const displayName=name.length>22?name.substring(0,22)+"…":name;
-    h+=`<text x="${l.x+l.w/2}" y="${l.y+2.2}" text-anchor="middle" fill="#f8fafc" font-size="1.5" font-weight="700">${displayName}</text>`;
-
-    // Sub-label lines
-    if(l.subLabel){
-      const lines=l.subLabel.split("\n");
-      lines.forEach((ln,i)=>{
-        const isCrit=ln.includes("⚠")||ln.includes("MOST COMPLEX")||ln.includes("LARGEST")||ln.includes("ANOMALY")||ln.includes("HIGHEST")||ln.includes("RESOLUTION")||ln.includes("inconsistency");
-        h+=`<text x="${l.x+l.w/2}" y="${l.y+4+i*1.5}" text-anchor="middle" fill="${isCrit?"#fbbf24":"#94a3b8"}" font-size="${isCrit?'1.15':'1.05'}" font-weight="${isCrit?'600':'400'}">${ln}</text>`;
-      });
-    }
-
-    // Badge strip at bottom of block
-    const badges=[];
-    if(l.hasPlc)badges.push({lb:"PLC",c:"#3b82f6"});
-    if(l.hasPromess)badges.push({lb:"PROMESS",c:"#a855f7"});
-    if(l.hasCognex)badges.push({lb:"COGNEX",c:"#22d3ee"});
-    if(l.hasPointIO)badges.push({lb:"PT I/O",c:"#14b8a6"});
-    if(!l.hasPlc&&l.cat!=="anomaly")badges.push({lb:"PW ONLY",c:"#475569"});
-    if(l.cat==="anomaly")badges.push({lb:"⚠ RESOLVE",c:"#dc2626"});
-
-    if(badges.length>0){
-      const totalGap=0.3*(badges.length-1);
-      const bw=(l.w-0.6-totalGap)/badges.length;
-      badges.forEach((b,bi)=>{
-        const bx=l.x+0.3+bi*(bw+0.3);
-        h+=`<rect x="${bx}" y="${l.y+l.h-2.2}" width="${bw}" height="1.8" rx="0.4" fill="${b.c}" opacity="0.85"/>`;
-        h+=`<text x="${bx+bw/2}" y="${l.y+l.h-1.15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="0.9" font-weight="700">${b.lb}</text>`;
-      });
-    }
-
-    // Anomaly exclamation
-    if(l.cat==="anomaly"){
-      h+=`<text x="${l.x+l.w-1.5}" y="${l.y+2}" fill="#ef4444" font-size="2.5" font-weight="700">!</text>`;
-    }
-
+    h+=`<rect class="sf" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="${fill}" opacity=".9"/>`;
+    h+=`<rect class="sb" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="none" stroke="${stroke}" stroke-width="${sw}" ${l.cat==='a'?'stroke-dasharray="2,1"':''}/>`;
+    h+=`<text x="${l.x+l.w/2}" y="${l.y+2.2}" text-anchor="middle" fill="#f8fafc" font-size="1.4" font-weight="700" font-family="Oswald">${l.nm}</text>`;
+    if(l.sl){l.sl.split("\n").forEach((ln,i)=>{
+      const cr=ln.includes("⚠")||ln.includes("MOST")||ln.includes("LARGEST")||ln.includes("ANOMALY")||ln.includes("RESOLVE")||ln.includes("gap");
+      h+=`<text x="${l.x+l.w/2}" y="${l.y+4+i*1.5}" text-anchor="middle" fill="${cr?'var(--ob)':'var(--ts)'}" font-size="${cr?'1.1':'1'}" font-weight="${cr?'600':'400'}">${ln}</text>`;
+    })}
+    const bg=[];if(l.plc)bg.push({l:"PLC",c:"#3b82f6"});if(l.pr)bg.push({l:"PROMESS",c:"#a855f7"});if(l.cx)bg.push({l:"COGNEX",c:"#22d3ee"});if(l.pio)bg.push({l:"PT I/O",c:"#14b8a6"});if(!l.plc&&l.cat!=="a")bg.push({l:"PP ONLY",c:"#475569"});if(l.cat==="a")bg.push({l:"⚠ RESOLVE",c:"#dc2626"});
+    if(bg.length){const tg=.3*(bg.length-1),bw=(l.w-.6-tg)/bg.length;bg.forEach((b,bi)=>{
+      const bx=l.x+.3+bi*(bw+.3);h+=`<rect x="${bx}" y="${l.y+l.h-2.2}" width="${bw}" height="1.8" rx=".4" fill="${b.c}" opacity=".85"/>`;
+      h+=`<text x="${bx+bw/2}" y="${l.y+l.h-1.15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size=".85" font-weight="700" font-family="Oswald">${b.l}</text>`;
+    })}
     h+=`</g>`;
   });
-
   svg.innerHTML=h;
 }
 
-function selectStation(id){
-  selectedId=selectedId===id?null:id;renderMap();
-  const p=document.getElementById("detailPanel");
-  if(!selectedId){p.classList.remove("visible");return}
-  const l=LOCS.find(x=>x.id===id);if(!l){p.classList.remove("visible");return}
-
-  let html=`<div class="detail-header"><div><div class="detail-title" style="color:${l.color}">${l.name}</div><div class="detail-zone">${l.zone}</div></div><button class="close-btn" onclick="selectStation('${id}')">✕</button></div>`;
-
-  html+=`<div class="badge-row">`;
-  if(l.hasPlc)html+=`<span class="badge" style="background:#1e3a8a;color:#93c5fd">PLC: ${l.plcModel}</span>`;
-  if(l.hasHmi)html+=`<span class="badge" style="background:#1e3a5f;color:#93c5fd">HMI: ${l.hmiModel}</span>`;
-  if(l.hasPromess)html+=`<span class="badge" style="background:#3b0764;color:#c4b5fd">Promess: ${l.promessModel}</span>`;
-  if(l.hasCognex)html+=`<span class="badge" style="background:#083344;color:#67e8f9">Cognex: ${l.cognexModel}</span>`;
-  if(l.hasPointIO)html+=`<span class="badge" style="background:#042f2e;color:#5eead4">Point I/O: ${l.pointIO}</span>`;
-  if(!l.hasPlc)html+=`<span class="badge" style="background:#1c1917;color:#a8a29e">NO MWES PLC</span>`;
-  html+=`</div>`;
-
-  html+=`<div class="two-col"><div>`;
-  html+=`<h3 class="section-title">HARDWARE & EQUIPMENT</h3>`;
-
-  if(l.hasPromess)html+=`<div class="hw-block"><div class="hw-label" style="color:#a855f7">PROMESS SERVO PRESS</div><div class="hw-val">${l.promessModel}</div><div class="hw-sub">Controller: ${l.promessCtrl}</div><div class="hw-sub">Frame: ${l.promessFrame}</div><div class="hw-sub">Max requirement: ${l.promessMax}</div></div>`;
-  if(l.hasCognex)html+=`<div class="hw-block"><div class="hw-label" style="color:#22d3ee">COGNEX VISION</div><div class="hw-val">${l.cognexModel}</div><div class="hw-warn">Programming: ${l.cognexProg}</div></div>`;
-
-  html+=`<div class="hw-block"><div class="hw-label" style="color:#f97316">TORQUE TOOLS</div><div class="hw-val">Count: ${l.torqueTools} | Range: ${l.torqueRange}</div><div class="hw-sub">Owner: ${l.torqueOwner}</div></div>`;
-  html+=`<div class="hw-block"><div class="hw-label" style="color:#16a34a">PIVOTWARE</div><div class="hw-val">${l.pivotware}</div>`;
-  if(l.pwInterface&&l.pwInterface!=="N/A")html+=`<div class="hw-warn">Interface: ${l.pwInterface}</div>`;
-  html+=`</div>`;
-  if(l.network)html+=`<div class="hw-block"><div class="hw-label" style="color:#94a3b8">NETWORK</div><div class="hw-val">${l.network}</div>${l.drives?`<div class="hw-sub">Drives: ${l.drives}</div>`:""}</div>`;
-
-  html+=`</div><div>`;
-
-  if(l.equipment){
-    html+=`<h3 class="section-title">EQUIPMENT LIST</h3>`;
-    l.equipment.forEach(e=>{html+=`<div class="eq-item">• ${e}</div>`});
-  }
-  if(l.concerns){
-    html+=`<h3 class="section-title red" style="margin-top:12px">CONCERNS & OPEN ISSUES (${l.concerns.length})</h3>`;
-    l.concerns.forEach(c=>{
-      const crit=c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT")||c.includes("RECOMMEND");
-      html+=`<div class="concern-item ${crit?"critical":""}">${c}</div>`;
-    });
-  }
-  html+=`</div></div>`;
-  p.innerHTML=html;p.style.borderColor=l.color;p.classList.add("visible");
-  p.scrollIntoView({behavior:"smooth",block:"nearest"});
+function selS1(id){
+  s1sel=s1sel===id?null:id;renderS1Map();
+  const p=document.getElementById("s1detail");
+  if(!s1sel){p.classList.remove("vis");return}
+  const l=LOCS.find(x=>x.id===id);if(!l){p.classList.remove("vis");return}
+  let h=`<div style="display:flex;justify-content:space-between"><div><div style="font-family:Oswald;font-size:16px;font-weight:700;color:${l.c};text-transform:uppercase">${l.nm}</div><div style="font-size:11px;color:var(--tm);margin:2px 0 8px">${l.z}</div></div><button onclick="selS1('${id}')" style="background:0;border:0;color:var(--ts);cursor:pointer;font-size:18px">✕</button></div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">`;
+  if(l.plc)h+=`<span class="tg tg-b">PLC: ${l.plcM}</span>`;if(l.hmi)h+=`<span class="tg tg-b">HMI: ${l.hmiM}</span>`;
+  if(l.pr)h+=`<span class="tg tg-p">Promess: ${l.prM}</span>`;if(l.cx)h+=`<span class="tg tg-p">Cognex: ${l.cxM}</span>`;
+  if(l.pio)h+=`<span class="tg tg-g">Point I/O: ${l.pioM}</span>`;if(!l.plc)h+=`<span class="tg tg-gr">NO MWES PLC</span>`;
+  h+=`</div><div class="g2"><div>`;
+  h+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);border-bottom:1px solid var(--bd);padding-bottom:4px;margin-bottom:6px">EQUIPMENT</div>`;
+  if(l.eq)l.eq.forEach(e=>{h+=`<div style="font-size:11px;color:var(--tp);padding:2px 0;border-bottom:1px solid var(--nd)">• ${e}</div>`});
+  h+=`<div style="font-size:11px;margin-top:6px;color:var(--ts)"><strong>Torque:</strong> ${l.tt} tools (${l.tr}) | <strong>ProPlanner:</strong> ${l.pw}</div>`;
+  h+=`</div><div><div style="font-family:Oswald;font-size:12px;color:#f87171;border-bottom:1px solid #5c1a1a;padding-bottom:4px;margin-bottom:6px">CONCERNS (${l.con.length})</div>`;
+  l.con.forEach(c=>{const cr=c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("RECOMMEND")||c.includes("SCOPE");h+=`<div class="${cr?'oq':'nt2'}" style="font-size:11px">${c}</div>`});
+  h+=`</div></div>`;
+  p.innerHTML=h;p.style.borderColor=l.c;p.style.border=`2px solid ${l.c}`;p.classList.add("vis");
 }
 
-function renderProjectConcerns(){
-  let h=`<h3>PROJECT-WIDE CONTROLS CONCERNS</h3>`;
-  PROJ_CONCERNS.forEach(c=>{
-    h+=`<div class="pc-item ${c.s}"><div class="pc-header"><span class="pc-title ${c.s}">${c.t}</span><span class="pc-sev ${c.s}">${c.s.toUpperCase()}</span></div><p class="pc-desc">${c.d}</p></div>`;
+function renderS1Concerns(){
+  let h=`<h2 style="color:#f87171;font-size:15px;border-color:#c0392b">Project-Wide Controls Concerns</h2>`;
+  PCON.forEach(c=>{
+    const bg=c.s==="h"?"#3d1515":"#3d2a10",bc=c.s==="h"?"#c0392b":"var(--o)",tc=c.s==="h"?"#f87171":"var(--ob)";
+    h+=`<div style="padding:8px 10px;margin-bottom:6px;border-radius:4px;background:${bg};border-left:4px solid ${bc}"><div style="display:flex;justify-content:space-between"><span style="font-family:Oswald;font-size:12px;font-weight:600;color:${tc}">${c.t}</span><span class="tg ${c.s==='h'?'tg-r':'tg-o'}">${c.s.toUpperCase()}</span></div><p style="font-size:11px;color:var(--tp);margin-top:3px;line-height:1.4">${c.d}</p></div>`;
   });
-  document.getElementById("projectConcerns").innerHTML=h;
+  document.getElementById("s1concerns").innerHTML=h;
 }
 
-document.addEventListener("DOMContentLoaded",init);
+// ═══════ SCREEN 2: PROCESS FLOW ═══════
+function showFlow(n){
+  [0,1,2].forEach(i=>{document.getElementById("flow"+i).style.display=i===n?"block":"none"});
+  document.querySelectorAll(".flow-tab").forEach((t,i)=>{t.classList.toggle("act",i===n)});
+}
+
+function makeFlowRow(steps,color){
+  return `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin:4px 0">${steps.map((s,i)=>{
+    const isS=typeof s==="object";const lbl=isS?s.t:s;const sub=isS?s.s:"";const w=isS&&s.w?s.w:"";const typ=isS?s.type||"step":"step";
+    const bg=typ==="start"?"var(--g)":typ==="end"?"var(--o)":typ==="sub"?"#3b1764":typ==="test"?"#1e3a5f":typ==="press"?"#5c1a1a":color;
+    return `${i>0?'<span class="flow-arrow">→</span>':''}<div class="flow-box" style="background:${bg};min-width:${w||'90px'}">${lbl}${sub?`<div style="font-size:9px;color:var(--ts);margin-top:2px">${sub}</div>`:''}</div>`;
+  }).join("")}</div>`;
+}
+
+function initS2(){
+  // Center Housing
+  let ch='';
+  ch+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin-bottom:6px">MAINLINE SEQUENCE (ON CART)</div>`;
+  ch+=makeFlowRow([
+    {t:"Place Housing",s:"428.7 Kg",type:"start"},{t:"Press Dowel Pins",type:"step"},{t:"Press Bearing Cups",type:"press"},
+    {t:"Install Mid Plate",s:"73.5 Kg",type:"sub"},{t:"Flip Housing 180°",type:"step"},{t:"Install Front Plate",s:"214.5 Kg",type:"sub"},
+    {t:"Install Shift Cyl",s:"3.2 Kg",type:"sub"},{t:"Flip Housing 180°",type:"step"}
+  ],"var(--nl)");
+  ch+=makeFlowRow([
+    {t:"Install Hydrostat",s:"174.3 Kg",type:"sub"},{t:"Install Pump Drive",s:"205 Kg",type:"sub"},{t:"Install Snap Ring",type:"step"},
+    {t:"Flip Housing 180°",type:"step"},{t:"Install G41 & Cover",s:"8.8 Kg",type:"sub"},{t:"Install Ring Gear",s:"34.9 Kg",type:"sub"},
+    {t:"Install Planetary",s:"39.1 Kg",type:"sub"},{t:"Flip Housing 90°",type:"step"}
+  ],"var(--nl)");
+  ch+=makeFlowRow([
+    {t:"Install Top Plate",type:"sub"},{t:"Install Side Plate",type:"sub"},{t:"Install Front Housing",s:"496 Kg",type:"sub"},
+    {t:"Install Rear Housing",s:"522 Kg",type:"sub"},{t:"Alignment Check",type:"test"},{t:"Complete",s:"~1,239.8 Kg",type:"end"}
+  ],"var(--nl)");
+
+  ch+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin:12px 0 6px">SUB-ASSEMBLIES FEEDING MAINLINE</div>`;
+  const subs=[
+    {n:"Mid Plate & S13",w:"73.5 Kg",st:["S13 Shaft Assy","Bearing Press (20kN)","Gear Press","Rocker Arm","Pawl Measure","Vision Check"],c:"#7c3aed"},
+    {n:"Shaft S18/S21/S25",w:"varies",st:["Load Shaft","Bearing Press (40kN)","Oil Seal Press","Gear Press","Vision Check"],c:"#7c3aed"},
+    {n:"S12 & Front Plate",w:"214.5 Kg",st:["S12 Shaft Assy","Fork Shifter Assy","Bearing Press (60kN)","Bushing Press","Vision Check"],c:"#7c3aed"},
+    {n:"Pump Drive & Clutch",w:"205 Kg",st:["S33 Shaft","Pump Plate","Clutch A&B","Bearing Press (30kN)","Vision Check"],c:"#9333ea"},
+    {n:"Ring Gear & Misc",w:"34.9 Kg",st:["G34 Assy","G31 Assy","G41 Assy","Ring Gear Press (30kN)"],c:"#9333ea"},
+    {n:"Shift Cylinder",w:"3.2 Kg",st:["Shaft Seal","O-Ring","Spool Install","Bore Measure","Functional Test"],c:"#dc2626"},
+    {n:"Hydrostat",w:"174.3 Kg",st:["Cart Assy #1","Cart Assy #2","Pneumatic Press"],c:"#475569"},
+    {n:"Planetary",w:"39.1 Kg",st:["Gear Fixture","Dummy Pins","Air Hammer"],c:"#475569"},
+  ];
+  subs.forEach(s=>{
+    ch+=`<div style="margin-bottom:6px"><span style="font-family:Oswald;font-size:11px;color:${s.c};font-weight:600">${s.n}</span> <span style="font-size:10px;color:var(--ts)">(${s.w})</span>`;
+    ch+=`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-top:2px">${s.st.map((st,i)=>`${i>0?'<span class="flow-arrow" style="font-size:12px">→</span>':''}<div class="flow-sub" style="border-color:${s.c}44">${st}</div>`).join("")}</div></div>`;
+  });
+  document.getElementById("centerFlow").innerHTML=ch;
+
+  // Front Housing
+  let fh='';
+  fh+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin-bottom:6px">GEAR SUB-ASSEMBLIES (10 PRESS OPERATIONS)</div>`;
+  const gears=["Input Shaft Gear","Input Gear Cover","Output Shaft Gear","Fan Pump Drive","Output Cover A","Output Cover B","Idler Gear","Idler Shaft","Pinion Seal Cover","Sun Gear"];
+  fh+=`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${gears.map(g=>`<div class="flow-sub" style="border-color:var(--g)">${g}<div style="font-size:8px;color:var(--g)">Press 40kN</div></div>`).join("")}</div>`;
+  fh+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin-bottom:6px">HOUSING ASSEMBLY SEQUENCE</div>`;
+  fh+=makeFlowRow([
+    {t:"Place Housing",s:"378 Kg",type:"start"},{t:"Press Dowel Pins",type:"step"},{t:"Press Bearing Cups",type:"press"},
+    {t:"Install Park Brake",type:"step"},{t:"Install Sun Gear",type:"step"},{t:"Rotate 180°",type:"step"},
+    {t:"Install Idler Gear",type:"step"},{t:"Press Idler Shaft",type:"press"}
+  ],"#0d6b5e");
+  fh+=makeFlowRow([
+    {t:"Shim Idler",s:"LVDT #4",type:"test"},{t:"Install Input Gear",type:"step"},{t:"Shim Input",s:"LVDT #1",type:"test"},
+    {t:"Install Cover",type:"step"},{t:"Install Output Gear",type:"step"},{t:"Shim Output",s:"LVDT #2",type:"test"},
+    {t:"Install MFD",type:"step"},{t:"Shim MFD",s:"LVDT #3",type:"test"},{t:"Complete",s:"496 Kg",type:"end"}
+  ],"#0d6b5e");
+
+  document.getElementById("frontFlow").innerHTML=fh;
+
+  // Rear Housing
+  let rh='';
+  rh+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin-bottom:6px">CVT OUTPUT SHAFT SUB-ASSEMBLY</div>`;
+  rh+=makeFlowRow([{t:"Place Bearing Cup",type:"step"},{t:"Place Cover",type:"step"},{t:"Press (40kN)",type:"press"},{t:"Install Locknut",type:"step"}],"#92400e");
+  rh+=`<div style="font-family:Oswald;font-size:12px;color:var(--ts);margin:10px 0 6px">HOUSING ASSEMBLY SEQUENCE</div>`;
+  rh+=makeFlowRow([
+    {t:"Place Housing",s:"424 Kg (front up)",type:"start"},{t:"Install Guide Pins",type:"step"},{t:"Install Park Brake",s:"60 Kg",type:"sub"},
+    {t:"Bolt PB Cover",type:"step"},{t:"Press Bevel Bearing",type:"press"},{t:"Roll 90°",type:"step"}
+  ],"#92400e");
+  rh+=makeFlowRow([
+    {t:"Install Hydraulic Conn",type:"step"},{t:"Roll 90°",type:"step"},{t:"Press Roller Bearing",type:"press"},
+    {t:"Install Output Shaft",s:"20 Kg",type:"sub"},{t:"Bolt Cover",type:"step"},{t:"Install Torque Sensor",type:"step"}
+  ],"#92400e");
+  rh+=makeFlowRow([
+    {t:"Measure Rolling Torque",type:"test"},{t:"Roll 90°",type:"step"},{t:"Install Charge Pump",type:"step"},
+    {t:"Install Sensors",type:"step"},{t:"Roll 90°",type:"step"},{t:"Complete",s:"522 Kg",type:"end"}
+  ],"#92400e");
+  document.getElementById("rearFlow").innerHTML=rh;
+}
+
+// ═══════ SCREEN 3: PROPLANNER STATIONS ═══════
+const S3STNS=[
+{id:"st1",nm:"Station #1 — Mainline",c:"var(--g)",plc:"PLC-01",tt:7,
+steps:[{sn:"4",cm:"PRESS_CHECK",d:"Bearing press ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"5",cm:"PRESSURE_DECAY",d:"Clutch circuit test",r:"DECAY;PASS/FAIL;psi;step;",ext:1},{sn:"6",cm:"SHIFT_SPIN",d:"Servo+valves+sensors",r:"SPIN;PASS/FAIL;step;",ext:1},{sn:"1",cm:"ABORT",d:"Emergency abort",r:"None"}],
+note:"7 torque tools sequenced by ProPlanner independently."},
+{id:"mp",nm:"Mid-Plate & S13",c:"#a78bfa",plc:"PLC-02",tt:4,
+steps:[{sn:"2",cm:"CAMERA_JOB",d:"Cognex job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger inspection",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-20 operations",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract press & shuttle",r:"None"}],
+note:"Pneumatic shuttle must be retracted before operator access."},
+{id:"shaft",nm:"Shaft S18/S21/S25",c:"#a78bfa",plc:"PLC-03",tt:0,
+steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job per shaft type",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-40 ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract drawer",r:"None"}],
+note:"Simplest interface — no torque tools."},
+{id:"s12fp",nm:"S12 & Front Plate",c:"#a78bfa",plc:"PLC-04",tt:6,
+steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-60 LARGEST",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe all 3 axes",r:"None"}],
+note:"CRITICAL: Must safe main + both aux axes. S12 torque test interface TBD."},
+{id:"pd",nm:"Pump Drive & Clutch",c:"#c084fc",plc:"PLC-05",tt:7,
+steps:[{sn:"2",cm:"CAMERA_JOB",d:"5+ sub-assy variants",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-30 dual aux",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe 3 axes",r:"None"}],
+note:"Widest variety of operations. 5+ recipes."},
+{id:"fh",nm:"Front Housing",c:"#2dd4bf",plc:"PLC-07",tt:9,
+steps:[{sn:"4",cm:"PRESS_CHECK",d:"10 gear sub-assy ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"7",cm:"SHIM_MEASURE",d:"4 LVDT devices",r:"SHIM;dev;val;shim;step;",ext:1},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],
+note:"MOST COMPLEX — 10 press ops + 4 shims + roll-over + conveyors per cycle."},
+{id:"rh",nm:"Rear Housing",c:"var(--o)",plc:"PLC-08",tt:"TBD",
+steps:[{sn:"4",cm:"PRESS_CHECK",d:"CVT output press",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],
+note:"Torque tool count TBD. Charge pump option may add ops."}
+];
+
+function initS3(){
+  const c=document.getElementById("s3stations");
+  let h="";
+  S3STNS.forEach(s=>{
+    h+=`<div class="scard" id="s3-${s.id}" onclick="document.getElementById('s3-${s.id}').classList.toggle('exp')">`;
+    h+=`<div class="shdr"><div><span style="color:${s.c};font-weight:700;font-size:13px;font-family:Oswald;text-transform:uppercase;letter-spacing:.5px">${s.nm}</span> `;
+    h+=`<span class="tg tg-b">${s.plc}</span><span class="tg tg-p">${s.tt} TOOLS</span><span class="tg tg-g">${s.steps.length} CMDS</span>`;
+    h+=`</div><span class="ei">▼</span></div>`;
+    h+=`<div class="sdet"><table><tr><th>Step</th><th>Command</th><th>Description</th><th>Response</th></tr>`;
+    s.steps.forEach(st=>{
+      const sc=st.sn==="1"?"#f87171":st.sn==="2"?"var(--gb)":st.sn==="3"?"#c084fc":"var(--ob)";
+      h+=`<tr${st.ext?' style="background:#3d2a10"':''}><td style="color:${sc};font-weight:700;font-size:14px;text-align:center;font-family:Oswald">${st.sn}</td>`;
+      h+=`<td style="font-family:Oswald;font-size:11px;letter-spacing:.5px">${st.cm}</td><td>${st.d}</td>`;
+      h+=`<td class="mo" style="font-size:10px">${st.r}${st.ext?' <span class="tg tg-o">C13</span>':''}</td></tr>`;
+    });
+    h+=`</table>`;
+    if(s.note)h+=`<div class="nt2" style="margin-top:6px;font-size:11px">${s.note}</div>`;
+    h+=`</div></div>`;
+  });
+  c.innerHTML=h;
+}
+
+// ═══════ INIT ═══════
+document.addEventListener("DOMContentLoaded",()=>{initS1();initS2();initS3()});
 </script>
 </body>
 </html>
