@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C13 CVT Transmission — Process Flow Diagram | MWES</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+    body { font-family: 'Montserrat', 'Segoe UI', sans-serif; background: #283549; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+    ::-webkit-scrollbar-thumb { background: rgba(59,177,73,0.35); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(59,177,73,0.55); }
+    button:hover { filter: brightness(1.15); }
+    button:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useRef, useCallback, useEffect } = React;
+
+    const BRAND = { green: "#3BB149", navy: "#283549", orange: "#D07A08", gray: "#E9E9E9", navyLight: "#344863", navyDark: "#1c2636", white: "#ffffff" };
+
+    const CATEGORIES = {
+      mainline: { label: "MAINLINE STATION", color: "#C62828", text: "#fff" },
+      sub: { label: "SUB-ASSEMBLY", color: BRAND.navyLight, text: "#fff" },
+      press: { label: "PRESS OPERATION", color: BRAND.green, text: "#fff" },
+      inspect: { label: "INSPECTION / QC", color: "#5C6BC0", text: "#fff" },
+      decision: { label: "DECISION", color: BRAND.orange, text: "#fff" },
+      transport: { label: "TRANSPORT / CART", color: "#546E7A", text: "#fff" },
+      customer: { label: "CUSTOMER EQUIP.", color: "#F4A825", text: BRAND.navy },
+      housing: { label: "HOUSING AREA", color: BRAND.green, text: "#fff" },
+    };
+
+    const nodes = [
+      { id: "agv_center", label: "AGV Delivers\nCenter Housing", cat: "transport", x: 60, y: 340, w: 140, h: 56 },
+      { id: "load_cart", label: "Load Center Housing\nonto Cart", cat: "mainline", x: 240, y: 340, w: 150, h: 56 },
+      { id: "vi_center", label: "Visual\nInspection", cat: "decision", x: 430, y: 340, w: 100, h: 56, diamond: true },
+      { id: "st1", label: "Station #1\nDowels, Bearings,\nBushings, Mid Plate", cat: "mainline", x: 600, y: 340, w: 170, h: 64 },
+      { id: "clutch_test", label: "Clutch Circuit\nPressure Decay Test", cat: "inspect", x: 820, y: 340, w: 160, h: 56 },
+      { id: "clutch_pass", label: "Pass?", cat: "decision", x: 1020, y: 340, w: 80, h: 56, diamond: true },
+      { id: "shift_spin", label: "Shift & Spin\nTest", cat: "inspect", x: 1150, y: 340, w: 130, h: 56 },
+      { id: "shift_pass", label: "Pass?", cat: "decision", x: 1320, y: 340, w: 80, h: 56, diamond: true },
+      { id: "st2", label: "Station #2\nHydrostat, Pump Plate,\nRing Gear, Planetary", cat: "mainline", x: 1460, y: 340, w: 180, h: 64 },
+      { id: "st3", label: "Station #3\nTop & Side Plates,\nFront & Rear Housing", cat: "mainline", x: 1700, y: 340, w: 180, h: 64 },
+      { id: "vi_final", label: "Final Visual\nInspection", cat: "decision", x: 1940, y: 340, w: 110, h: 56, diamond: true },
+      { id: "unload", label: "Unload\nCompleted Trans.", cat: "transport", x: 2110, y: 340, w: 140, h: 56 },
+      { id: "rework_clutch", label: "Rework /\nRepair", cat: "customer", x: 1020, y: 450, w: 100, h: 48 },
+      { id: "rework_shift", label: "Rework /\nRepair", cat: "customer", x: 1320, y: 450, w: 100, h: 48 },
+      { id: "rework_final", label: "Rework /\nRepair", cat: "customer", x: 1940, y: 450, w: 110, h: 48 },
+      { id: "reject_center", label: "Reject /\nScrap", cat: "customer", x: 430, y: 450, w: 100, h: 48 },
+      { id: "mid_plate_press", label: "Mid-Plate Press\n(Promess 20kN)\nS13 Shaft Assy", cat: "press", x: 340, y: 120, w: 165, h: 64 },
+      { id: "mid_plate_vi", label: "Vision\nInspect", cat: "inspect", x: 540, y: 120, w: 100, h: 50 },
+      { id: "shaft_press", label: "Shaft Press\n(Promess 40kN)\nS18, S21, S25", cat: "press", x: 340, y: 210, w: 165, h: 64 },
+      { id: "shaft_vi", label: "Vision\nInspect", cat: "inspect", x: 540, y: 210, w: 100, h: 50 },
+      { id: "shift_cyl_sub", label: "Shift Cylinder\nSub-Assy\n& Bore Check", cat: "sub", x: 680, y: 120, w: 140, h: 64 },
+      { id: "s12_front_press", label: "S12 & Front Plate\nPress (Promess 60kN)\nFork Shifter Assy", cat: "press", x: 680, y: 210, w: 175, h: 64 },
+      { id: "s12_vi", label: "Vision\nInspect", cat: "inspect", x: 880, y: 210, w: 100, h: 50 },
+      { id: "hydro_sub", label: "Hydrostat\nSub-Assy", cat: "sub", x: 1300, y: 120, w: 130, h: 56 },
+      { id: "pump_press", label: "Pump Drive &\nClutch Press\n(Promess 30kN)", cat: "press", x: 1450, y: 120, w: 160, h: 64 },
+      { id: "pump_vi", label: "Vision\nInspect", cat: "inspect", x: 1450, y: 210, w: 100, h: 50 },
+      { id: "ring_press", label: "Ring Gear Press\n(Promess 30kN)\nG31, G41 Assy", cat: "press", x: 1600, y: 120, w: 160, h: 64 },
+      { id: "planetary_sub", label: "Planetary &\nMisc Sub-Assy", cat: "sub", x: 1600, y: 210, w: 140, h: 56 },
+      { id: "top_side_sub", label: "Top & Side\nPlate Sub-Assy", cat: "sub", x: 1790, y: 120, w: 140, h: 56 },
+      { id: "agv_front", label: "AGV Delivers\nFront Housing", cat: "transport", x: 60, y: 620, w: 140, h: 56 },
+      { id: "vi_front", label: "Visual\nInspection", cat: "decision", x: 240, y: 620, w: 100, h: 56, diamond: true },
+      { id: "reject_front", label: "Reject", cat: "customer", x: 240, y: 730, w: 80, h: 42 },
+      { id: "front_conv", label: "Buffer Conveyor\nto Assembly", cat: "transport", x: 380, y: 620, w: 140, h: 56 },
+      { id: "gear_press", label: "Gear Press Station\n(Promess 40kN)\n10 Sub-Assemblies", cat: "press", x: 560, y: 620, w: 175, h: 64 },
+      { id: "front_assy", label: "Front Housing\nAssembly Station\nw/ Roll-Over", cat: "mainline", x: 780, y: 620, w: 165, h: 64 },
+      { id: "shim_measure", label: "Shim Measurement\n(4 LVDT Devices)", cat: "inspect", x: 990, y: 620, w: 160, h: 56 },
+      { id: "shim_pass", label: "Shims\nOK?", cat: "decision", x: 1190, y: 620, w: 90, h: 56, diamond: true },
+      { id: "shim_rework", label: "Re-shim", cat: "customer", x: 1190, y: 730, w: 90, h: 42 },
+      { id: "rolling_torque_front", label: "Rolling Torque\nMeasurement", cat: "inspect", x: 1320, y: 620, w: 140, h: 56 },
+      { id: "torque_pass_front", label: "Pass?", cat: "decision", x: 1500, y: 620, w: 80, h: 56, diamond: true },
+      { id: "torque_rework_front", label: "Rework", cat: "customer", x: 1500, y: 730, w: 80, h: 42 },
+      { id: "front_vi_final", label: "Final\nInspection", cat: "decision", x: 1630, y: 620, w: 100, h: 56, diamond: true },
+      { id: "front_to_main", label: "Transfer to\nStation #3", cat: "transport", x: 1780, y: 620, w: 130, h: 56 },
+      { id: "dropbox_sub", label: "Drop Box\nSub-Assy", cat: "sub", x: 560, y: 730, w: 120, h: 50 },
+      { id: "agv_rear", label: "AGV Delivers\nRear Housing", cat: "transport", x: 60, y: 870, w: 140, h: 56 },
+      { id: "vi_rear", label: "Visual\nInspection", cat: "decision", x: 240, y: 870, w: 100, h: 56, diamond: true },
+      { id: "reject_rear", label: "Reject", cat: "customer", x: 240, y: 975, w: 80, h: 42 },
+      { id: "rear_conv", label: "Buffer Conveyor\nto Assembly", cat: "transport", x: 380, y: 870, w: 140, h: 56 },
+      { id: "rear_assy", label: "Rear Housing\nAssembly Station\nw/ Roll-Over", cat: "mainline", x: 560, y: 870, w: 165, h: 64 },
+      { id: "cvt_output_press", label: "CVT Output Press\n(Promess 40kN)", cat: "press", x: 560, y: 975, w: 165, h: 56 },
+      { id: "rear_bearing", label: "Bearing Press\nOperations", cat: "press", x: 770, y: 870, w: 140, h: 56 },
+      { id: "rolling_torque_rear", label: "Rolling Torque\nMeasurement\n(Output, Hub, PB)", cat: "inspect", x: 950, y: 870, w: 165, h: 64 },
+      { id: "torque_pass_rear", label: "Pass?", cat: "decision", x: 1155, y: 870, w: 80, h: 56, diamond: true },
+      { id: "torque_rework_rear", label: "Rework", cat: "customer", x: 1155, y: 975, w: 80, h: 42 },
+      { id: "rear_vi_final", label: "Final Visual\nInspection", cat: "decision", x: 1280, y: 870, w: 110, h: 56, diamond: true },
+      { id: "rear_rework_final", label: "Rework", cat: "customer", x: 1280, y: 975, w: 80, h: 42 },
+      { id: "rear_to_main", label: "Transfer to\nStation #3", cat: "transport", x: 1440, y: 870, w: 130, h: 56 },
+      { id: "zone_center", label: "CENTER HOUSING ASSEMBLY", cat: "housing", x: 900, y: 50, w: 280, h: 36, zone: true },
+      { id: "zone_front", label: "FRONT HOUSING ASSEMBLY", cat: "housing", x: 700, y: 555, w: 270, h: 36, zone: true },
+      { id: "zone_rear", label: "REAR HOUSING ASSEMBLY", cat: "housing", x: 700, y: 810, w: 260, h: 36, zone: true },
+    ];
+
+    const edges = [
+      { from: "agv_center", to: "load_cart" }, { from: "load_cart", to: "vi_center" },
+      { from: "vi_center", to: "st1", label: "Good" }, { from: "vi_center", to: "reject_center", label: "No Good" },
+      { from: "st1", to: "clutch_test" }, { from: "clutch_test", to: "clutch_pass" },
+      { from: "clutch_pass", to: "shift_spin", label: "Pass" }, { from: "clutch_pass", to: "rework_clutch", label: "Fail" },
+      { from: "shift_spin", to: "shift_pass" }, { from: "shift_pass", to: "st2", label: "Pass" },
+      { from: "shift_pass", to: "rework_shift", label: "Fail" }, { from: "st2", to: "st3" },
+      { from: "st3", to: "vi_final" }, { from: "vi_final", to: "unload", label: "Good" },
+      { from: "vi_final", to: "rework_final", label: "No Good" },
+      { from: "mid_plate_press", to: "mid_plate_vi" }, { from: "mid_plate_vi", to: "st1", dashed: true },
+      { from: "shaft_press", to: "shaft_vi" }, { from: "shaft_vi", to: "st1", dashed: true },
+      { from: "shift_cyl_sub", to: "st1", dashed: true },
+      { from: "s12_front_press", to: "s12_vi" }, { from: "s12_vi", to: "st1", dashed: true },
+      { from: "hydro_sub", to: "st2", dashed: true },
+      { from: "pump_press", to: "pump_vi" }, { from: "pump_vi", to: "st2", dashed: true },
+      { from: "ring_press", to: "st2", dashed: true }, { from: "planetary_sub", to: "st2", dashed: true },
+      { from: "top_side_sub", to: "st3", dashed: true },
+      { from: "agv_front", to: "vi_front" }, { from: "vi_front", to: "front_conv", label: "Good" },
+      { from: "vi_front", to: "reject_front", label: "No Good" }, { from: "front_conv", to: "gear_press" },
+      { from: "gear_press", to: "front_assy" }, { from: "dropbox_sub", to: "gear_press", dashed: true },
+      { from: "front_assy", to: "shim_measure" }, { from: "shim_measure", to: "shim_pass" },
+      { from: "shim_pass", to: "rolling_torque_front", label: "OK" },
+      { from: "shim_pass", to: "shim_rework", label: "Re-shim" },
+      { from: "rolling_torque_front", to: "torque_pass_front" },
+      { from: "torque_pass_front", to: "front_vi_final", label: "Pass" },
+      { from: "torque_pass_front", to: "torque_rework_front", label: "Fail" },
+      { from: "front_vi_final", to: "front_to_main", label: "Good" },
+      { from: "front_to_main", to: "st3", dashed: true, label: "To Mainline" },
+      { from: "agv_rear", to: "vi_rear" }, { from: "vi_rear", to: "rear_conv", label: "Good" },
+      { from: "vi_rear", to: "reject_rear", label: "No Good" }, { from: "rear_conv", to: "rear_assy" },
+      { from: "cvt_output_press", to: "rear_assy", dashed: true }, { from: "rear_assy", to: "rear_bearing" },
+      { from: "rear_bearing", to: "rolling_torque_rear" }, { from: "rolling_torque_rear", to: "torque_pass_rear" },
+      { from: "torque_pass_rear", to: "rear_vi_final", label: "Pass" },
+      { from: "torque_pass_rear", to: "torque_rework_rear", label: "Fail" },
+      { from: "rear_vi_final", to: "rear_to_main", label: "Good" },
+      { from: "rear_vi_final", to: "rear_rework_final", label: "No Good" },
+      { from: "rear_to_main", to: "st3", dashed: true, label: "To Mainline" },
+    ];
+
+    const details = {
+      st1: { title: "STATION #1 — CENTER HOUSING", part: "Center Housing P/N 92228185", controls: "CompactLogix PLC, OPTIX 12\" HMI, Ethernet/IP", operations: ["Install dowels, bearings, bushings (rear face)", "Mid plate installation (from sub-assy)", "Front plate installation (from sub-assy)", "Shift cylinder installation", "Clutch circuit pressure decay test", "Shift & spin test with temporary test plates"], equipment: "3 threaded press tools, 4 air hammer tools, 3 plastic hand tools, pressure decay test unit, shift & spin test cart", custEquip: "7 torque tools (58–265 Nm), hoist w/ bales, Pivotware I/O rack" },
+      st2: { title: "STATION #2 — CENTER HOUSING", part: "Center Housing P/N 92228185", controls: "N/A (customer Pivotware controlled)", operations: ["Hydrostat sub-assembly installation", "Pump drive plate installation", "G41 gear & ring gear installation", "Planetary carrier installation", "PTO shaft installation"], equipment: "2 guide rods (hydrostat), plastic hand tool, grease table", custEquip: "12 torque tools (45–2000 Nm), hoist w/ bales, Pivotware I/O rack" },
+      st3: { title: "STATION #3 — CENTER HOUSING", part: "Center Housing P/N 92228185", controls: "N/A (customer Pivotware controlled)", operations: ["Top plate installation", "Side plate installation", "Front housing assembly installation", "Rear housing assembly installation", "Sealant application"], equipment: "4 plastic hand tools, 2 front housing guide pins, 2 rear housing guide pins, grease table", custEquip: "8 torque tools (10–325 Nm), hoist w/ bales, sealant dispense, Pivotware I/O rack" },
+      mid_plate_press: { title: "MID-PLATE ASSEMBLY STATION", part: "Mid Plate P/N 92282256, Shaft S13 P/N 92082728", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["S13 shaft assembly", "Mid plate sub-assembly", "Rocker arm sub-assembly (arbor press)", "Bearing press operations (H-Frame)", "Pawl arm shifter measurement"], equipment: "Promess EMAP-20/350/200 (20kN), arbor press, Cognex 3816M camera, 2 gauge blocks w/ dial gauges", custEquip: "4 torque tools (20–338 Nm), Pivotware I/O rack" },
+      shaft_press: { title: "SHAFT ASSEMBLY STATION (S18, S21, S25)", part: "S18 P/N 92265872, S21 P/N 92265183, S25 P/N 92082741", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["S18 shaft bearing & seal press", "S21 shaft bearing & seal press", "S25 shaft bearing press", "Multiple gear cup operations"], equipment: "Promess EMAP-40/350/200 (40kN), C-Frame w/ drawer, 2 tooling racks, Cognex 3816M camera", custEquip: "Hoist w/ bales, snap ring pliers, Pivotware I/O rack" },
+      s12_front_press: { title: "S12 & FRONT PLATE ASSEMBLY", part: "S12 Shaft, Fork Shifter P/N 92703280, Front Plate P/N 92254268", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["S12 shaft sub-assembly", "Fork shifter assembly", "Front plate top/bottom assembly", "Shaft assembly fixture operations", "Dual auxiliary axis press operations"], equipment: "Promess EMAP-60/330/200 (60kN), H-Frame w/ 2 aux axes, Cognex 3816M camera, fork fixture", custEquip: "6 torque tools (3.5–400 Nm), S12 rolling torque tester, Pivotware I/O rack" },
+      shift_cyl_sub: { title: "SHIFT CYLINDER SUB-ASSEMBLY", part: "No drawings provided", controls: "N/A", operations: ["Shaft seal assembly", "O-ring assembly", "Spool installation", "Final assembly", "Functional test bench (pressure sensor)", "Electronic bore measurement w/ PLC feedback"], equipment: "Arbor press, functional test bench, electronic bore measurement device", custEquip: "Snap ring pliers, circlip pliers, Pivotware I/O rack" },
+      hydro_sub: { title: "HYDROSTAT SUB-ASSEMBLY", part: "HydroStat Assembly P/N 92300309", controls: "N/A", operations: ["Assembly on fixture carts", "Hand-held pneumatic press operations"], equipment: "2 assembly/fixture carts, pneumatic press tool w/ balancer", custEquip: "3 torque tools (57–280 Nm), hoist, Pivotware I/O rack" },
+      pump_press: { title: "PUMP DRIVE PLATE & CLUTCH ASSEMBLY", part: "Pump Plate P/N 92257109, Clutch B P/N 92687735, Clutch A P/N 92687717", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["S33 shaft assembly", "Pump plate assembly", "Clutch A/B bearing assemblies", "Pump drive gear bearing assembly", "Clutch assembly to pump plate"], equipment: "Promess EMAP-30/350/200 (30kN), H-Frame w/ dual aux axes, Cognex 3816M camera", custEquip: "7 torque tools (12–338 Nm), Pivotware I/O rack" },
+      ring_press: { title: "RING GEAR & MISC SUB-ASSEMBLY", part: "G31 P/N 92082789, G41 P/N 92082805, Ring Gear Support P/N 92082797", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["G34 gear assembly", "G31 gear assembly", "G41 gear assembly", "Ring gear assembly"], equipment: "Promess EMAP-30/350/200 (30kN), C-Frame w/ drawer, tooling rack", custEquip: "Hoist w/ bales as required" },
+      planetary_sub: { title: "PLANETARY & MISC SUB-ASSEMBLY", part: "Planetary Gear Assembly P/N 92082798", controls: "N/A", operations: ["Gear fixture operations", "3 outer gear assembly nests w/ alignment pins", "Air hammer driving (6mm dowel pin)"], equipment: "Table w/ gear fixture, 3 nests, air hammer tools", custEquip: "2 torque tools (8.9 & 57.3 Nm), Pivotware I/O rack" },
+      top_side_sub: { title: "TOP & SIDE PLATE SUB-ASSEMBLY", part: "Top Plate P/N 92302347, Side Plate P/N 92302346", controls: "N/A", operations: ["Table fixture operations for top & side plates"], equipment: "Table w/ fixture", custEquip: "2 torque tools (10 & 23 Nm), Pivotware I/O rack" },
+      gear_press: { title: "GEAR PRESS STATION — FRONT HOUSING", part: "10 gear sub-assemblies", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["Input shaft gear sub-assy (bearings + O-ring)", "Input gear cover sub-assy (bearing + oil seal)", "Output shaft gear sub-assy (bearings)", "Fan pump drive gear sub-assy (ball bearing + snap ring)", "Output gear cover sub-assy — Pos A & B", "Idler gear sub-assy (taper bearings)", "Idler gear shaft sub-assy (dowel pin)", "Pinion seal cover sub-assy (oil seal + snap ring)", "Sun gear sub-assy (oil seal + snap ring)"], equipment: "Promess EMAP-40/330/200 (40kN), H-Frame w/ aux axis, 10 lower fixtures, 14+ upper tools, 2 tooling racks", custEquip: "9 torque tools (37–265 Nm), Pivotware I/O rack" },
+      front_assy: { title: "FRONT HOUSING ASSEMBLY STATION", part: "Front Housing P/N 92228181 (~70 BOM items)", controls: "CompactLogix PLC, OPTIX 12\" HMI, PowerFlex VFDs", operations: ["Press bearing cups (input & output positions)", "Install circlip, MFD park brake shaft cups", "Install park brake w/ hoist, bolt cover", "Install sun gear assembly, idler gear", "Multiple shim measurements (4 LVDT devices)", "Install input/output gear covers, bolt", "Install MFD output flange, shim, bolt"], equipment: "Roll-over device (0/90/180 deg), 36\" roller ball table ~8ft, buffer conveyor, air hammer", custEquip: "9 torque tools, MFD rolling torque tester, hoist w/ bales, Pivotware I/O rack" },
+      rear_assy: { title: "REAR HOUSING ASSEMBLY STATION", part: "Rear Housing P/N 92228189 (~20 BOM items)", controls: "CompactLogix PLC, OPTIX 12\" HMI, PowerFlex VFDs", operations: ["Install guide pins & park brake", "Bolt MFD/PB cover", "Install bevel pinion shaft bearing", "Roll over 90 deg — hydraulic connectors", "Roll over 90 deg — roller cylindrical bearing press", "Install output shaft sub, align cover, bolt", "Install torque sensor shaft sub, retainer ring", "Rolling torque measurements (3 assemblies)", "Roll over 90 deg — charge pump assy (17 bolts)", "Install temp sensor, heater, speed sensor"], equipment: "Roll-over device (0/90/180 deg), buffer conveyor, bearing press tools", custEquip: "Torque tools w/ balancers, output shaft rolling torque tester, Pivotware I/O rack" },
+      cvt_output_press: { title: "CVT OUTPUT PRESS STATION", part: "Driven Output Shaft P/N 92283267", controls: "CompactLogix PLC, OPTIX 12\" HMI", operations: ["Driver output gear shaft (TR-RH46): bearing cup press", "Driver output gear shaft (TR-RH18): bearing & roller press, locknut torque"], equipment: "Promess EMAP-40/330/200 (40kN), C-Frame w/ drawer, bearing cup tools, nut crimp tool", custEquip: "Torque wrench for locknut" },
+      load_cart: { title: "CART LOADING & TRANSPORT", part: "C13 CVT Transmission P/N 92239041", controls: "48V battery, magnet tape guidance, pushbutton control", operations: ["Pick center housing from conveyor", "Install mounting bolts onto cart", "Move forward (button held) through stations", "2-axis positioner: 12\" vertical, +/-180 deg rotation"], equipment: "7 carts total — base weldment, 4 swivel casters, 2 drive wheels, ball screw drives, brushless DC motors, ~200' magnet tape", custEquip: "Customer-provided lift for housing loading, DC tools for mounting bolts" },
+    };
+
+    function MWESLogo({ width = 120 }) {
+      return (
+        <svg viewBox="0 0 320 75" width={width} style={{ display: "block" }}>
+          <ellipse cx="48" cy="38" rx="44" ry="30" fill="none" stroke={BRAND.green} strokeWidth="6" opacity="0.6" transform="rotate(-12, 48, 38)" />
+          <ellipse cx="48" cy="38" rx="34" ry="22" fill="none" stroke={BRAND.green} strokeWidth="4.5" opacity="0.4" transform="rotate(-8, 48, 38)" />
+          <text x="102" y="50" fontFamily="'Oswald', sans-serif" fontWeight="700" fontSize="46" fill="white" letterSpacing="3">MWES</text>
+          <text x="104" y="67" fontFamily="'Montserrat', sans-serif" fontWeight="600" fontSize="8.5" fill="rgba(255,255,255,0.5)" letterSpacing="2.5">MIDWEST ENGINEERED SYSTEMS</text>
+        </svg>
+      );
+    }
+
+    function gc(n) { return { x: n.x + n.w/2, y: n.y + n.h/2 }; }
+    function ep(f, t) {
+      const fc = gc(f), tc = gc(t), dx = tc.x-fc.x, dy = tc.y-fc.y;
+      let sx,sy,ex,ey;
+      if (Math.abs(dx)>Math.abs(dy)) { if(dx>0){sx=f.x+f.w;sy=fc.y;ex=t.x;ey=tc.y}else{sx=f.x;sy=fc.y;ex=t.x+t.w;ey=tc.y} }
+      else { if(dy>0){sx=fc.x;sy=f.y+f.h;ex=tc.x;ey=t.y}else{sx=fc.x;sy=f.y;ex=tc.x;ey=t.y+t.h} }
+      if(Math.abs(sx-ex)<5||Math.abs(sy-ey)<5) return `M${sx},${sy} L${ex},${ey}`;
+      if(Math.abs(dx)>Math.abs(dy)){const mx=(sx+ex)/2;return `M${sx},${sy} L${mx},${sy} L${mx},${ey} L${ex},${ey}`;}
+      const my=(sy+ey)/2;return `M${sx},${sy} L${sx},${my} L${ex},${my} L${ex},${ey}`;
+    }
+
+    function App() {
+      const cRef = useRef(null);
+      const [tf, setTf] = useState({x:0,y:0,scale:1});
+      const [drag, setDrag] = useState(false);
+      const dsRef = useRef({x:0,y:0});
+      const tfRef = useRef(tf);
+      const [sel, setSel] = useState(null);
+      const [hov, setHov] = useState(null);
+      const nm = {}; nodes.forEach(n=>nm[n.id]=n);
+      useEffect(()=>{tfRef.current=tf;},[tf]);
+
+      const hw = useCallback((e)=>{
+        e.preventDefault(); const d=e.deltaY>0?0.9:1.1, t=tfRef.current;
+        const ns=Math.max(0.15,Math.min(4,t.scale*d)), r=cRef.current.getBoundingClientRect();
+        const cx=e.clientX-r.left,cy=e.clientY-r.top;
+        setTf({scale:ns,x:cx-(cx-t.x)*(ns/t.scale),y:cy-(cy-t.y)*(ns/t.scale)});
+      },[]);
+      useEffect(()=>{const el=cRef.current;if(el)el.addEventListener("wheel",hw,{passive:false});return()=>el&&el.removeEventListener("wheel",hw);},[hw]);
+
+      const md=(e)=>{if(e.target.closest(".nd"))return;setDrag(true);dsRef.current={x:e.clientX-tf.x,y:e.clientY-tf.y};};
+      const mm=(e)=>{if(drag)setTf(t=>({...t,x:e.clientX-dsRef.current.x,y:e.clientY-dsRef.current.y}));};
+      const mu=()=>setDrag(false);
+
+      const tRef=useRef({ld:null});
+      const ts=(e)=>{if(e.touches.length===1){setDrag(true);dsRef.current={x:e.touches[0].clientX-tf.x,y:e.touches[0].clientY-tf.y};}if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;tRef.current.ld=Math.sqrt(dx*dx+dy*dy);}};
+      const tmv=(e)=>{e.preventDefault();if(e.touches.length===1&&drag)setTf(t=>({...t,x:e.touches[0].clientX-dsRef.current.x,y:e.touches[0].clientY-dsRef.current.y}));if(e.touches.length===2&&tRef.current.ld){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,dist=Math.sqrt(dx*dx+dy*dy),dl=dist/tRef.current.ld,cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2,r=cRef.current.getBoundingClientRect(),px=cx-r.left,py=cy-r.top;setTf(t=>{const ns=Math.max(0.15,Math.min(4,t.scale*dl));return{scale:ns,x:px-(px-t.x)*(ns/t.scale),y:py-(py-t.y)*(ns/t.scale)};});tRef.current.ld=dist;}};
+      const te=()=>{setDrag(false);tRef.current.ld=null;};
+
+      const ftv=useCallback(()=>{
+        if(!cRef.current)return;const r=cRef.current.getBoundingClientRect(),p=60;
+        const x1=Math.min(...nodes.map(n=>n.x))-p,y1=Math.min(...nodes.map(n=>n.y))-p;
+        const x2=Math.max(...nodes.map(n=>n.x+n.w))+p,y2=Math.max(...nodes.map(n=>n.y+n.h))+p;
+        const cw=x2-x1,ch=y2-y1,s=Math.min(r.width/cw,r.height/ch,1.5);
+        setTf({scale:s,x:(r.width-cw*s)/2-x1*s,y:(r.height-ch*s)/2-y1*s});
+      },[]);
+      useEffect(()=>{const t=setTimeout(ftv,150);window.addEventListener("resize",ftv);return()=>{clearTimeout(t);window.removeEventListener("resize",ftv);};},[ftv]);
+
+      const rn=(n)=>{
+        if(n.zone) return <g key={n.id}><rect x={n.x} y={n.y} width={n.w} height={n.h} rx={4} fill={BRAND.green} opacity={0.9}/><text x={n.x+n.w/2} y={n.y+n.h/2+1} textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="13" fontWeight="700" letterSpacing="2" style={{fontFamily:"'Oswald',sans-serif"}}>{n.label}</text></g>;
+        const c=CATEGORIES[n.cat],ih=hov===n.id,is=sel===n.id,hd=!!details[n.id],cx=n.x+n.w/2,cy=n.y+n.h/2;
+        if(n.diamond){const hw=n.w/2,hh=n.h/2;return<g key={n.id} className="nd" style={{cursor:hd?"pointer":"default"}} onClick={()=>hd&&setSel(n.id)} onMouseEnter={()=>setHov(n.id)} onMouseLeave={()=>setHov(null)}><polygon points={`${cx},${cy-hh} ${cx+hw},${cy} ${cx},${cy+hh} ${cx-hw},${cy}`} fill={c.color} stroke={is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.25)"} strokeWidth={is?3:ih?2.5:1.5} filter={ih?"url(#mg)":undefined}/>{n.label.split("\n").map((l,i,a)=><text key={i} x={cx} y={cy+(i-(a.length-1)/2)*14} textAnchor="middle" dominantBaseline="central" fill={c.text} fontSize="11" fontWeight="600" style={{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}}>{l}</text>)}</g>;}
+        return<g key={n.id} className="nd" style={{cursor:hd?"pointer":"default"}} onClick={()=>hd&&setSel(n.id)} onMouseEnter={()=>setHov(n.id)} onMouseLeave={()=>setHov(null)}><rect x={n.x} y={n.y} width={n.w} height={n.h} rx={5} fill={c.color} stroke={is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.15)"} strokeWidth={is?3:ih?2.5:1} filter={ih?"url(#mg)":undefined}/>{hd&&<rect x={n.x+n.w-19} y={n.y+3} width={15} height={15} rx={3} fill="rgba(255,255,255,0.2)"/>}{hd&&<text x={n.x+n.w-11.5} y={n.y+12.5} textAnchor="middle" dominantBaseline="central" fill="rgba(255,255,255,0.8)" fontSize="9" style={{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}}>i</text>}{n.label.split("\n").map((l,i,a)=><text key={i} x={cx} y={cy+(i-(a.length-1)/2)*14} textAnchor="middle" dominantBaseline="central" fill={c.text} fontSize="11" fontWeight="600" style={{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}}>{l}</text>)}</g>;
+      };
+
+      const re=(e,i)=>{
+        const f=nm[e.from],t=nm[e.to];if(!f||!t)return null;const p=ep(f,t);
+        const fl=e.label==="Fail"||e.label==="No Good"||e.label==="Re-shim";
+        return<g key={`e${i}`}><path d={p} fill="none" stroke={e.dashed?"rgba(59,177,73,0.4)":"rgba(255,255,255,0.22)"} strokeWidth={e.dashed?1.5:2} strokeDasharray={e.dashed?"6,4":undefined} markerEnd={e.dashed?"url(#ag)":"url(#aw)"}/>{e.label&&(()=>{const fc=gc(f),tc=gc(t);return<text x={(fc.x+tc.x)/2} y={(fc.y+tc.y)/2-6} textAnchor="middle" fontSize="9" fontWeight="700" fill={fl?"#EF5350":BRAND.green} style={{fontFamily:"'Montserrat',sans-serif"}}>{e.label}</text>;})()}</g>;
+      };
+
+      const dd=sel?details[sel]:null;
+      const zn=[{x:30,y:80,w:2250,h:440,c:"rgba(198,40,40,0.06)",b:"rgba(198,40,40,0.18)"},{x:30,y:545,w:1900,h:250,c:"rgba(59,177,73,0.04)",b:"rgba(59,177,73,0.12)"},{x:30,y:800,w:1550,h:240,c:"rgba(59,177,73,0.04)",b:"rgba(59,177,73,0.12)"}];
+      const bs={background:"rgba(59,177,73,0.15)",border:"1px solid rgba(59,177,73,0.3)",color:BRAND.green,padding:"6px 14px",borderRadius:5,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1,transition:"all 0.15s ease"};
+
+      return(
+        <div style={{width:"100%",height:"100vh",background:BRAND.navy,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+          <div style={{background:`linear-gradient(135deg,${BRAND.navyDark} 0%,${BRAND.navy} 100%)`,borderBottom:`2px solid ${BRAND.green}`,padding:"10px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,flexWrap:"wrap",gap:12}}>
+            <div style={{display:"flex",alignItems:"center",gap:20}}>
+              <MWESLogo width={140}/>
+              <div style={{height:36,width:1,background:"rgba(59,177,73,0.25)"}}/>
+              <div>
+                <div style={{color:"#fff",fontSize:18,fontWeight:700,letterSpacing:2,fontFamily:"'Oswald',sans-serif",textTransform:"uppercase"}}>C13 CVT TRANSMISSION</div>
+                <div style={{color:"rgba(255,255,255,0.45)",fontSize:10.5,fontFamily:"'Montserrat',sans-serif",fontWeight:500,marginTop:1}}>Process Flow Diagram &bull; CNH America LLC &bull; Full System Overview</div>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <button onClick={ftv} style={bs}>FIT TO VIEW</button>
+              <button onClick={()=>setTf(t=>({...t,scale:Math.min(4,t.scale*1.3)}))} style={{...bs,padding:"6px 10px",fontSize:14,letterSpacing:0}}>+</button>
+              <button onClick={()=>setTf(t=>({...t,scale:Math.max(0.15,t.scale*0.77)}))} style={{...bs,padding:"6px 10px",fontSize:14,letterSpacing:0}}>−</button>
+            </div>
+          </div>
+
+          <div style={{display:"flex",gap:16,padding:"7px 24px",flexWrap:"wrap",alignItems:"center",background:BRAND.navyDark,borderBottom:"1px solid rgba(59,177,73,0.1)",flexShrink:0}}>
+            <span style={{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginRight:4}}>LEGEND:</span>
+            {Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=><div key={k} style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:k==="decision"?9:12,height:k==="decision"?9:12,background:c.color,borderRadius:k==="decision"?0:2,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.08)"}}/><span style={{color:"rgba(255,255,255,0.5)",fontSize:10,fontWeight:500,whiteSpace:"nowrap",fontFamily:"'Montserrat',sans-serif"}}>{c.label}</span></div>)}
+            <div style={{display:"flex",alignItems:"center",gap:5}}><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke={BRAND.green} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5"/></svg><span style={{color:"rgba(255,255,255,0.5)",fontSize:10,fontWeight:500,whiteSpace:"nowrap",fontFamily:"'Montserrat',sans-serif"}}>SUB-ASSY FEED</span></div>
+          </div>
+
+          <div ref={cRef} style={{flex:1,position:"relative",cursor:drag?"grabbing":"grab",touchAction:"none",background:`radial-gradient(ellipse at 25% 35%, rgba(59,177,73,0.03) 0%, transparent 55%), ${BRAND.navy}`}} onMouseDown={md} onMouseMove={mm} onMouseUp={mu} onMouseLeave={mu} onTouchStart={ts} onTouchMove={tmv} onTouchEnd={te}>
+            <svg width="100%" height="100%" style={{position:"absolute",top:0,left:0}}>
+              <defs>
+                <marker id="aw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="rgba(255,255,255,0.3)"/></marker>
+                <marker id="ag" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><path d="M0,0 L7,2.5 L0,5 Z" fill={BRAND.green} opacity="0.5"/></marker>
+                <filter id="mg"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor={BRAND.orange} floodOpacity="0.4"/></filter>
+              </defs>
+              <g transform={`translate(${tf.x},${tf.y}) scale(${tf.scale})`}>
+                {zn.map((z,i)=><rect key={`z${i}`} x={z.x} y={z.y} width={z.w} height={z.h} rx={10} fill={z.c} stroke={z.b} strokeWidth={1.5}/>)}
+                {edges.map(re)}
+                {nodes.map(rn)}
+              </g>
+            </svg>
+          </div>
+
+          {dd&&<div style={{position:"absolute",top:110,right:16,width:380,maxWidth:"calc(100vw - 32px)",background:BRAND.navyDark,border:"1px solid rgba(59,177,73,0.2)",borderTop:`3px solid ${BRAND.green}`,borderRadius:"0 0 8px 8px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",zIndex:100,maxHeight:"calc(100vh - 150px)",overflowY:"auto"}}>
+            <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(59,177,73,0.12)",display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"sticky",top:0,background:BRAND.navyDark}}>
+              <div style={{paddingRight:12}}><div style={{color:BRAND.green,fontSize:14,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1}}>{dd.title}</div><div style={{color:"rgba(255,255,255,0.4)",fontSize:11,marginTop:4,fontFamily:"'Montserrat',sans-serif"}}>{dd.part}</div></div>
+              <button onClick={()=>setSel(null)} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(59,177,73,0.2)",color:BRAND.green,width:26,height:26,borderRadius:4,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontFamily:"'Montserrat',sans-serif"}}>&#x2715;</button>
+            </div>
+            <div style={{padding:"12px 18px 16px"}}>
+              <div style={{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}}>CONTROLS</div>
+              <div style={{color:"rgba(255,255,255,0.65)",fontSize:12,marginBottom:14,lineHeight:1.5,fontFamily:"'Montserrat',sans-serif"}}>{dd.controls}</div>
+              <div style={{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}}>OPERATIONS</div>
+              {dd.operations.map((o,i)=><div key={i} style={{color:"rgba(255,255,255,0.6)",fontSize:11.5,marginBottom:4,paddingLeft:14,position:"relative",lineHeight:1.5,fontFamily:"'Montserrat',sans-serif"}}><span style={{position:"absolute",left:0,color:BRAND.green,fontWeight:700}}>&#x203A;</span>{o}</div>)}
+              <div style={{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}}>MWES EQUIPMENT</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6,fontFamily:"'Montserrat',sans-serif"}}>{dd.equipment}</div>
+              <div style={{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}}>CUSTOMER EQUIPMENT</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6,fontFamily:"'Montserrat',sans-serif"}}>{dd.custEquip}</div>
+            </div>
+          </div>}
+
+          <div style={{position:"absolute",bottom:0,left:0,right:0,height:30,background:BRAND.navyDark,borderTop:"1px solid rgba(59,177,73,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px"}}>
+            <div style={{color:"rgba(255,255,255,0.3)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}}>{Math.round(tf.scale*100)}% &bull; Scroll to zoom &bull; Drag to pan &bull; Click nodes for details</div>
+            <div style={{color:"rgba(255,255,255,0.2)",fontSize:9,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}}>MWES &bull; Innovation through Automation &bull; mwes.com</div>
+          </div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  </script>
+</body>
+</html>
