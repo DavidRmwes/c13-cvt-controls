@@ -213,38 +213,19 @@
       return(
         <div style={{width:"100%",height:"100vh",background:BRAND.navy,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}}>
 
-          {/* ═══ MATCHED HEADER BAR ═══ */}
-          <div style={{background:BRAND.navyDark,borderBottom:`3px solid ${BRAND.green}`,padding:0,display:"flex",alignItems:"stretch",flexShrink:0,minHeight:52}}>
-            {/* Logo section */}
-            <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 16px",borderRight:`1px solid ${BRAND.navyLight}`}}>
-              <div style={{width:34,height:34,borderRadius:"50%",background:BRAND.green,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Oswald',sans-serif",fontWeight:700,fontSize:14,color:"#fff"}}>M</div>
-              <div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:600,color:"#fff",letterSpacing:1}}>MWES</div>
-                <div style={{fontSize:9,color:"rgba(160,174,192,1)"}}>C13 CVT Transmission</div>
-              </div>
-            </div>
-            {/* Title section */}
-            <div style={{display:"flex",alignItems:"center",padding:"0 18px",gap:8}}>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:13,fontWeight:600,color:BRAND.green,letterSpacing:.5,textTransform:"uppercase"}}>Process Flow Diagram</div>
-              <div style={{color:"rgba(160,174,192,0.4)",fontSize:11}}>•</div>
-              <div style={{fontSize:10,color:"rgba(160,174,192,0.6)"}}>Full System Overview</div>
-            </div>
-            {/* Right side — controls + tags */}
-            <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6,padding:"0 14px"}}>
+          {/* ═══ SLIM TOOLBAR (no header — parent nav provides branding) ═══ */}
+          <div style={{background:BRAND.navyDark,borderBottom:`1px solid rgba(59,177,73,0.15)`,padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,height:36}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
               <button onClick={ftv} style={bs}>Fit View</button>
               <button onClick={()=>setTf(t=>({...t,scale:Math.min(4,t.scale*1.3)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>+</button>
               <button onClick={()=>setTf(t=>({...t,scale:Math.max(0.15,t.scale*0.77)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>−</button>
-              <div style={{width:1,height:24,background:BRAND.navyLight,margin:"0 4px"}}/>
-              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,padding:"2px 7px",borderRadius:3,background:"#2d8a38",color:"#fff",letterSpacing:.5}}>CNH America LLC</span>
-              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:9,padding:"2px 7px",borderRadius:3,background:"#5c3a10",color:"#f0a030",letterSpacing:.5}}>DRAFT</span>
+              <span style={{color:"rgba(255,255,255,0.3)",fontSize:10,marginLeft:8}}>{Math.round(tf.scale*100)}%</span>
             </div>
-          </div>
-
-          {/* ═══ LEGEND BAR ═══ */}
-          <div style={{display:"flex",gap:16,padding:"6px 24px",flexWrap:"wrap",alignItems:"center",background:BRAND.navyDark,borderBottom:`1px solid rgba(59,177,73,0.1)`,flexShrink:0}}>
-            <span style={{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginRight:4}}>LEGEND:</span>
-            {Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=><div key={k} style={{display:"flex",alignItems:"center",gap:5}}><div style={{width:k==="decision"?9:12,height:k==="decision"?9:12,background:c.color,borderRadius:k==="decision"?0:2,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.08)"}}/><span style={{color:"rgba(255,255,255,0.5)",fontSize:10,fontWeight:500,whiteSpace:"nowrap",fontFamily:"'Montserrat',sans-serif"}}>{c.label}</span></div>)}
-            <div style={{display:"flex",alignItems:"center",gap:5}}><svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke={BRAND.green} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5"/></svg><span style={{color:"rgba(255,255,255,0.5)",fontSize:10,fontWeight:500,whiteSpace:"nowrap",fontFamily:"'Montserrat',sans-serif"}}>SUB-ASSY FEED</span></div>
+            <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{color:BRAND.orange,fontSize:9,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5}}>LEGEND:</span>
+              {Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=><div key={k} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:k==="decision"?8:10,height:k==="decision"?8:10,background:c.color,borderRadius:k==="decision"?0:2,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.08)"}}/><span style={{color:"rgba(255,255,255,0.45)",fontSize:9,fontWeight:500,whiteSpace:"nowrap"}}>{c.label}</span></div>)}
+              <div style={{display:"flex",alignItems:"center",gap:4}}><svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3" stroke={BRAND.green} strokeWidth="1.5" strokeDasharray="3,2" opacity="0.5"/></svg><span style={{color:"rgba(255,255,255,0.45)",fontSize:9,fontWeight:500}}>SUB-ASSY FEED</span></div>
+            </div>
           </div>
 
           {/* ═══ CANVAS ═══ */}
