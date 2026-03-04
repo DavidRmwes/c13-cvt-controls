@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C13 CVT – Controls Engineering Reference</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;padding:12px;min-height:100vh}
+.container{max-width:1200px;margin:0 auto}
+h1{font-size:18px;font-weight:700;color:#f8fafc}
+.subtitle{font-size:11px;color:#94a3b8;margin:2px 0 8px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-bottom:10px}
+.stat-card{background:#1e293b;border-radius:4px;padding:5px 7px}
+.stat-val{font-size:18px;font-weight:700}
+.stat-lbl{font-size:9px;font-weight:600;color:#cbd5e1}
+.stat-sub{font-size:8px;color:#64748b}
+.filter-bar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.filter-btn{font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;border:1px solid #334155;background:#1e293b;color:#94a3b8;transition:all 0.15s}
+.filter-btn.active{border-color:#e2e8f0;background:#334155;color:#f8fafc}
+.filter-btn:hover{border-color:#64748b}
+.map-container{background:#1e293b;border-radius:6px;border:1px solid #334155;padding:8px;margin-bottom:10px}
+.map-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:10px;color:#64748b}
+.cardinal{color:#f8fafc;font-size:9px}
+svg text{user-select:none}
+.station-rect{cursor:pointer;transition:opacity 0.15s}
+.station-rect:hover{opacity:1!important}
+.detail-panel{background:#1e293b;border-radius:6px;padding:14px;margin-bottom:10px;display:none}
+.detail-panel.visible{display:block}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start}
+.detail-title{font-size:16px;font-weight:700}
+.detail-zone{font-size:11px;color:#64748b;margin:2px 0 10px}
+.close-btn{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;padding:0 4px}
+.close-btn:hover{color:#f8fafc}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+.section-title{font-size:12px;font-weight:700;color:#94a3b8;margin:0 0 6px;border-bottom:1px solid #334155;padding-bottom:4px}
+.section-title.red{color:#ef4444;border-color:#7f1d1d}
+.hw-block{margin-bottom:8px;padding:6px;background:#0f172a;border-radius:4px}
+.hw-label{font-size:10px;font-weight:600}
+.hw-val{font-size:11px;color:#e2e8f0;margin-top:2px}
+.hw-sub{font-size:10px;color:#94a3b8}
+.hw-warn{font-size:10px;color:#fbbf24}
+.eq-item{font-size:11px;color:#cbd5e1;padding:2px 0;border-bottom:1px solid #1e293b}
+.concern-item{font-size:11px;padding:4px 6px;margin-bottom:3px;border-radius:3px;border-left:3px solid #334155;background:#0f172a;color:#cbd5e1}
+.concern-item.critical{border-left-color:#f59e0b;background:#422006;color:#fbbf24}
+.project-concerns{background:#1e293b;border-radius:6px;border:2px solid #dc2626;padding:14px}
+.project-concerns h3{font-size:14px;font-weight:700;color:#ef4444;margin:0 0 8px}
+.pc-item{padding:8px 10px;margin-bottom:6px;border-radius:4px}
+.pc-item.high{background:#450a0a;border-left:4px solid #ef4444}
+.pc-item.medium{background:#422006;border-left:4px solid #f59e0b}
+.pc-item.low{background:#0f172a;border-left:4px solid #64748b}
+.pc-header{display:flex;justify-content:space-between;align-items:center}
+.pc-title{font-size:12px;font-weight:700}
+.pc-title.high{color:#fca5a5}.pc-title.medium{color:#fcd34d}.pc-title.low{color:#94a3b8}
+.pc-sev{font-size:9px;padding:1px 6px;border-radius:3px}
+.pc-sev.high{background:#7f1d1d;color:#fca5a5}.pc-sev.medium{background:#713f12;color:#fcd34d}.pc-sev.low{background:#1e293b;color:#94a3b8}
+.pc-desc{font-size:11px;color:#cbd5e1;margin-top:4px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>C13 CVT Transmission — Controls Engineering Reference</h1>
+<p class="subtitle">Interactive controls hardware map | Cardinal directions corrected | Click any station for full details | MWES – CNH America LLC</p>
+
+<div class="stats-grid" id="statsGrid"></div>
+<div class="filter-bar" id="filterBar"></div>
+
+<div class="map-container">
+  <div class="map-header">
+    <span>FLOOR MAP — Click station for controls details | Corrected orientation: ← EAST | WEST →</span>
+    <div style="display:flex;gap:8px">
+      <span class="cardinal">↑ SOUTH</span><span class="cardinal">↓ NORTH</span>
+      <span class="cardinal">← EAST</span><span class="cardinal">WEST →</span>
+    </div>
+  </div>
+  <svg id="floorMap" viewBox="-2 -2 72 58" style="width:100%;height:auto;max-height:380px;display:block"></svg>
+</div>
+
+<div class="detail-panel" id="detailPanel"></div>
+<div class="project-concerns" id="projectConcerns"></div>
+</div>
+
+<script>
+const LOCS=[
+{id:"st1",name:"Station #1 — Mainline (Center Housing)",zone:"Mainline",x:18,y:28,w:10,h:8,color:"#2563eb",hasPlc:true,hasHmi:true,hasPromess:false,hasCognex:false,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",torqueTools:7,torqueRange:"58–265 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Incoming part rack with sensor lights and Pivotware I/O",pwInterface:"UNDEFINED — Major open question",equipment:["Clutch circuit pressure decay test (analog pressure, timed sequence)","Shift & spin test (servo-motor + shaft, 3 pneumatic valves, magnet shift sensors)","Housing buffer conveyor — OPTIONAL ($81.2K): 3 zones, VFD-controlled"],concerns:["CRITICAL: Pressure decay test requires analog input + timed pass/fail logic — confirm PLC I/O count","Shift & spin test requires Kinetix servo axis — confirm sizing","3 pneumatic valves need discrete outputs + position feedback","Magnet shift sensor signal type TBD (discrete? analog?)","Pivotware interface: 7 torque tools customer-supplied — who sequences them?","SCOPE CONFLICT: 'no data collection' but tests inherently generate pass/fail data"],cat:"plc-hmi"},
+{id:"mid-plate",name:"Mid-Plate Assembly & S13 (South Side)",zone:"Sub-Assembly — North (corrected: South)",x:8,y:42,w:10,h:7,color:"#7c3aed",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',drives:"Ethernet/IP to Promess",network:"Ethernet/IP",promessModel:"EMAP-20/350/200 (20kN, 4,500 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"14,500 N (3,260 lbs)",promessFrame:"H-Frame with pneumatic fixture shuttle",cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED — via CN process",torqueTools:4,torqueRange:"20–338 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Incoming part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["H-Frame press with pneumatic fixture shuttle","Promess EMAP-20 servo press (20kN)","Cognex 3816M vision camera","Pawl arm measurement (2 gauge blocks)","Rocker arm station (manual arbor press)","Tooling support rack with position sensors"],concerns:["Promess Ethernet/IP — confirm IP scheme and PLC handshake","UltraPRO generates force/distance curves — CNH expects data stored?","Cognex programming NOT included — budget risk for CN hours","Cognex integration: pass/fail gating via PLC or standalone?","Pneumatic fixture shuttle needs discrete I/O for extend/retract","Tooling rack position sensors — how many discrete inputs?"],cat:"plc-hmi-promess-cognex"},
+{id:"shaft",name:"Shaft Assembly — S18/S21/S25 (South Side)",zone:"Sub-Assembly — South",x:14,y:6,w:10,h:7,color:"#7c3aed",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',drives:"Ethernet/IP to Promess",network:"Ethernet/IP",promessModel:"EMAP-40/350/200 (40kN, 9,000 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"27,500 N (6,182 lbs)",promessFrame:"C-Frame with lower press fixture drawer",cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["C-Frame press with lower fixture drawer","Promess EMAP-40 (40kN)","Cognex 3816M vision","2 tooling racks with position sensors","Seal ring alignment tool"],concerns:["Fixture drawer actuation mechanism TBD — servo or pneumatic?","20+ potential discrete inputs for tool position verification across 3 shaft types","PLC recipe management for S18 vs S21 vs S25 force profiles","No torque tools but Pivotware I/O present — what does Pivotware control here?"],cat:"plc-hmi-promess-cognex"},
+{id:"s12-fp",name:"S12 & Front Plate Assembly (South Side)",zone:"Sub-Assembly — South",x:26,y:6,w:10,h:7,color:"#7c3aed",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',drives:"Ethernet/IP to Promess + auxiliary Kinetix servos",network:"Ethernet/IP",promessModel:"EMAP-60/330/200 (60kN) — LARGEST ON LINE",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"37,000 N (8,318 lbs)",promessFrame:"H-Frame with DUAL auxiliary axes",cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",torqueTools:6,torqueRange:"3.5–400 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["H-Frame press — LARGEST (60kN)","Aux axis #1: Press actuator (ball screw/servo)","Aux axis #2: Fixture positioning (ball screw/servo)","Cognex 3816M vision","Fork assembly fixture","S12 rolling torque test device (customer)"],concerns:["CRITICAL: 3 coordinated axes — Promess main + 2 auxiliary. Who controls aux axes?","If Kinetix drives aux axes, need CompactLogix 5380 minimum for multi-axis","S12 rolling torque test device (customer) — interface spec needed","HIGHEST I/O COUNT station — size PLC chassis accordingly","400 Nm max torque tool — confirm Pivotware controller compatibility"],cat:"plc-hmi-promess-cognex"},
+{id:"pump-drive",name:"Pump Drive Plate & Clutch (South Side)",zone:"Sub-Assembly — South",x:40,y:6,w:10,h:7,color:"#9333ea",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',drives:"Ethernet/IP to Promess + dual aux axes",network:"Ethernet/IP",promessModel:"EMAP-30/350/200 (30kN, 6,750 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"22,500 N (5,058 lbs)",promessFrame:"H-Frame with dual auxiliary axes",cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED",torqueTools:7,torqueRange:"12–338 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["H-Frame press with dual aux axes","Promess EMAP-30 (30kN)","Cognex 3816M vision","Clutch A & B assembly ops","S33 shaft assembly ops"],concerns:["Dual aux axes — same architecture question as S12/Front Plate","Multiple assembly recipes (S33, pump plate, clutch A, B, gear bearing)","7 torque tools across multiple clutch operations — complex Pivotware sequencing","Widest variety of press operations — tool change verification critical"],cat:"plc-hmi-promess-cognex"},
+{id:"ring-gear",name:"Ring Gear & Misc Sub-Assembly (North Side)",zone:"Sub-Assembly — North",x:36,y:42,w:9,h:7,color:"#9333ea",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',drives:"Ethernet/IP to Promess",network:"Ethernet/IP",promessModel:"EMAP-30/350/200 (30kN, 6,750 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"20,000 N (4,496 lbs)",promessFrame:"C-Frame with lower fixture drawer",torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",pivotware:"NO",pwInterface:"N/A",equipment:["C-Frame press with lower fixture drawer","Promess EMAP-30 (30kN)","Tooling rack with position sensors"],concerns:["No Cognex camera — only press station without vision. Intentional?","Fixture drawer actuation TBD","Multiple gear recipes (G34, G31, G41, ring gear)","Simplest PLC station — press-driven only, no torque tools or Pivotware"],cat:"plc-hmi-promess"},
+{id:"front-hsg",name:"Front Housing Assembly (West Side)",zone:"Front Housing — West",x:56,y:28,w:10,h:8,color:"#0d9488",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:true,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",promessModel:"EMAP-40/330/200 (40kN, 9,000 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"31,500 N (7,081 lbs)",promessFrame:"H-Frame with aux axis fixture positioning",pointIO:"Junction boxes with AB Point I/O — conveyor control",torqueTools:9,torqueRange:"37–265 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["H-Frame press with aux axis fixture positioning","Promess EMAP-40 (40kN)","10 lower gear nests, 14 upper tools","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 8 ft","Roll-over device (0°/90°/180°)","4 LVDT shim measurement devices","Point I/O junction boxes","MFD rolling torque test device (customer)"],concerns:["ONLY STATION WITH POINT I/O — how many nodes? What's on Point I/O vs main chassis?","Roll-over device actuation — VFD or servo? 3 position stops with confirmation","4 LVDT shim measurements = 4 analog inputs — on Point I/O or main chassis?","CRITICAL: Shim values are quality data — conflicts with 'no data collection'","10 gear sub-assy operations — most tool changes of any press station","MOST COMPLEX controls station on the entire line","Housing 378 Kg — roll-over and conveyors sized with safety factor?"],cat:"plc-hmi-promess-pointio"},
+{id:"rear-hsg",name:"Rear Housing Assembly (North-West Side)",zone:"Rear Housing — North-West",x:50,y:42,w:9,h:7,color:"#f59e0b",hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',drives:"PowerFlex VFDs",network:"Ethernet/IP",promessModel:"EMAP-40/330/200 (40kN, 8,993 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",promessMax:"30,000 N",promessFrame:"C-Frame with lower fixture drawer",torqueTools:"Multiple (unspecified count)",torqueRange:"Various",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["C-Frame press with fixture drawer","Promess EMAP-40 (40kN)","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 12 ft","Roll-over device (0°/90°/180°)","Tooling rack with position sensors","Output shaft rolling torque test (customer)","Charge pump addition (OPTION — TBD)"],concerns:["Identical conveyors to front housing but NO Point I/O specified — inconsistency","Roll-over device same control questions as front housing","Rolling torque test device interface undefined","Charge pump option could add I/O and programming scope","Torque tool count not specified — confirm with CNH","Housing 424 Kg + sub-assemblies on roll-over"],cat:"plc-hmi-promess"},
+{id:"st2",name:"Station #2 — Mainline (Sub-Assy Install)",zone:"Mainline",x:30,y:28,w:10,h:8,color:"#475569",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:12,torqueRange:"45–2,000 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED — Pivotware owns ALL sequencing",equipment:["Guide rods for hydrostat installation","Table for amogel grease","12 customer torque tools (45–2,000 Nm!)"],concerns:["NO MWES PLC — 100% Pivotware-controlled","2,000 Nm max torque — confirm Pivotware compatibility","12 torque tools — HIGHEST COUNT, maximum Pivotware complexity","MWES has ZERO visibility into this station","Multiple heavy sub-assemblies: hydrostat 174.3 Kg, pump drive 205 Kg, ring gear 34.9 Kg"],cat:"no-plc"},
+{id:"st3",name:"Station #3 — Mainline (Final Assembly)",zone:"Mainline",x:42,y:28,w:10,h:8,color:"#475569",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:8,torqueRange:"10–325 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED",equipment:["Sealant application (47606598)","Assembly guide pins — front (2) & rear (2) housing","Special tool to rotate fan pump drive gear","8 customer torque tools"],concerns:["NO MWES PLC — Pivotware-controlled","Front housing (496 Kg) + rear housing (522 Kg) join here — heaviest ops","Sealant application quality — who verifies?","Final assy ~1,239.8 Kg on cart at all orientations","No quality gate / sign-off PLC logic at final station"],cat:"no-plc"},
+{id:"hydrostat",name:"Hydrostat Sub-Assembly (North Side)",zone:"Sub-Assembly — North",x:28,y:42,w:7,h:6,color:"#475569",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:3,torqueRange:"57–280 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["2 assembly/fixture carts","Hand-held pneumatic press with balancer"],concerns:["No MWES controls — Pivotware only","Pneumatic press: no force monitoring","Hydrostat 174.3 Kg — verify cart rating"],cat:"no-plc"},
+{id:"planetary",name:"Planetary & Misc Sub-Assembly (North)",zone:"Sub-Assembly — North",x:46,y:42,w:7,h:6,color:"#475569",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:2,torqueRange:"8.9 & 57.3 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["Table with gear fixture","3 outer gear nests with dummy pins","Air hammer tools"],concerns:["No MWES controls — simple manual station","Low torque — straightforward Pivotware"],cat:"no-plc"},
+{id:"top-side",name:"Top & Side Plate Sub-Assembly (South)",zone:"Sub-Assembly — South",x:50,y:6,w:7,h:6,color:"#475569",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:2,torqueRange:"23 & 10 Nm",torqueOwner:"Customer (CNH)",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["Table with fixture","2 customer torque tools"],concerns:["No MWES controls — simplest station","Low torque, minimal fixturing"],cat:"no-plc"},
+{id:"shift-cyl",name:"Shift Cylinder Sub-Assembly (North)",zone:"Sub-Assembly — North",x:20,y:42,w:7,h:6,color:"#dc2626",hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",equipment:["Arbor press station","Functional test bench (pressure sensor)","Electronic bore measurement with PLC feedback"],concerns:["RED FLAG: Controls N/A but has 'bore measurement with PLC feedback'","Which PLC does bore gauge feed? Mid-plate? Needs its own?","RECOMMEND: Point I/O drop from mid-plate PLC","Functional test bench pressure sensor — manual or PLC?","No drawings provided — design TBD, controls scope could expand"],cat:"anomaly"}
+];
+
+const STATS=[
+{v:"8",l:"CompactLogix",s:"PLCs",c:"#3b82f6"},{v:"8",l:'OPTIX 12"',s:"HMI Panels",c:"#60a5fa"},
+{v:"7",l:"Promess",s:"Servo Presses",c:"#a855f7"},{v:"4",l:"Cognex 3816M",s:"Vision Cameras",c:"#22d3ee"},
+{v:"1",l:"Point I/O",s:"Remote Racks",c:"#14b8a6"},{v:"56+",l:"Torque Tools",s:"Customer/PW",c:"#f97316"},
+{v:"11+",l:"Pivotware",s:"I/O Points",c:"#16a34a"},{v:"6",l:"No-PLC",s:"Stations",c:"#64748b"}
+];
+
+const FILTERS=[
+{key:"all",label:"All Stations"},{key:"hasPlc",label:"Has PLC"},{key:"noPlc",label:"No PLC"},
+{key:"hasPromess",label:"Promess Press"},{key:"hasCognex",label:"Cognex Vision"},
+{key:"hasPointIO",label:"Point I/O"},{key:"anomaly",label:"Anomalies/Risks"}
+];
+
+const PROJ_CONCERNS=[
+{t:"OPTIX Token Licensing",d:'All proposals state "token options NOT included, to be reviewed with customer." 8 panels × unknown cost = unbudgeted. Must resolve before PO.',s:"high"},
+{t:"Pivotware Interface — UNDEFINED",d:"11+ stations have Pivotware I/O. Zero specification for MWES PLC ↔ Pivotware handshake. Protocol, signals, initiator all TBD. #1 controls risk.",s:"high"},
+{t:"Data Collection Exclusion vs. Reality",d:"Proposals exclude data collection. But 7 Promess UltraPRO presses, 4 Cognex cameras, pressure decay tests, LVDTs, and 56+ torque tools all generate quality data. CNH almost certainly expects traceability.",s:"high"},
+{t:"Cognex Camera Programming",d:"4 cameras, zero programming included. 'Viability TBD once parts available.' Each camera could be 40–80 hrs. No budget estimate.",s:"medium"},
+{t:"Shift Cylinder Bore Gauge PLC Conflict",d:"Station listed Controls: N/A but needs 'electronic bore measurement with PLC feedback.' Recommend Point I/O to mid-plate PLC.",s:"medium"},
+{t:"Rear Housing Point I/O Gap",d:"Front housing has Point I/O for conveyors. Rear housing has identical conveyors but no Point I/O specified. Oversight?",s:"medium"},
+{t:"CompactLogix Processor Selection",d:"S12/Front Plate and Pump Drive have dual auxiliary servo axes. If Kinetix-driven, need 5380 series minimum. Affects cost significantly.",s:"medium"},
+{t:"Ethernet/IP Network Architecture",d:"8 PLCs + 7 Promess + 4 Cognex + Point I/O + VFDs + 11 Pivotware = complex network. Topology and IP scheme needed early.",s:"medium"},
+{t:"No-PLC Station Visibility Gap",d:"6 stations have no MWES PLC. Zero visibility into operations or quality. If CNH expects line-wide tracking, this is a problem.",s:"low"}
+];
+
+let currentFilter="all",selectedId=null;
+
+function init(){
+  renderStats();renderFilters();renderMap();renderProjectConcerns();
+}
+
+function renderStats(){
+  const g=document.getElementById("statsGrid");
+  g.innerHTML=STATS.map(s=>`<div class="stat-card" style="border-left:3px solid ${s.c}"><div class="stat-val" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div><div class="stat-sub">${s.s}</div></div>`).join("");
+}
+
+function renderFilters(){
+  const b=document.getElementById("filterBar");
+  b.innerHTML=FILTERS.map(f=>{
+    let cnt=f.key==="all"?LOCS.length:f.key==="noPlc"?LOCS.filter(l=>!l.hasPlc).length:f.key==="anomaly"?LOCS.filter(l=>l.cat==="anomaly"||l.concerns.some(c=>c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT"))).length:LOCS.filter(l=>l[f.key]).length;
+    return `<button class="filter-btn ${currentFilter===f.key?"active":""}" onclick="setFilter('${f.key}')">${f.label} (${cnt})</button>`;
+  }).join("");
+}
+
+function setFilter(f){currentFilter=f;selectedId=null;renderFilters();renderMap();document.getElementById("detailPanel").classList.remove("visible")}
+
+function getFiltered(){
+  return LOCS.filter(l=>{
+    if(currentFilter==="all")return true;
+    if(currentFilter==="hasPlc")return l.hasPlc;
+    if(currentFilter==="noPlc")return!l.hasPlc;
+    if(currentFilter==="anomaly")return l.cat==="anomaly"||l.concerns.some(c=>c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT"));
+    return l[currentFilter];
+  });
+}
+
+function renderMap(){
+  const svg=document.getElementById("floorMap");
+  const fl=getFiltered();const ids=new Set(fl.map(l=>l.id));
+  let h=`
+    <text x="35" y="1.5" fill="#475569" font-size="1.8" text-anchor="middle" font-weight="600">SOUTH — Sub-Assembly Stations</text>
+    <text x="22" y="26" fill="#475569" font-size="1.8" text-anchor="middle" font-weight="600">MAINLINE (EAST → WEST)</text>
+    <text x="25" y="40" fill="#475569" font-size="1.8" text-anchor="middle" font-weight="600">NORTH — Sub-Assembly & Rear Housing</text>
+    <text x="60" y="26" fill="#475569" font-size="1.5" text-anchor="middle" font-weight="600">WEST — Front Hsg</text>
+    <text x="-1" y="28" fill="#ef4444" font-size="2" font-weight="700">E</text>
+    <text x="69" y="28" fill="#ef4444" font-size="2" font-weight="700">W</text>
+    <text x="35" y="-0.5" fill="#ef4444" font-size="2" font-weight="700" text-anchor="middle">S</text>
+    <text x="35" y="56" fill="#ef4444" font-size="2" font-weight="700" text-anchor="middle">N</text>
+    <line x1="6" y1="32" x2="53" y2="32" stroke="#fbbf24" stroke-width="0.4" stroke-dasharray="1.5,1"/>
+    <text x="30" y="31.2" fill="#fbbf24" font-size="1.2" text-anchor="middle">Cart Path (~200 ft)</text>`;
+  LOCS.forEach(l=>{
+    const vis=ids.has(l.id);const isSel=selectedId===l.id;
+    const fill=isSel?l.color:vis?l.color+"88":l.color+"22";
+    const stroke=isSel?"#f8fafc":l.cat==="anomaly"?"#ef4444":l.color;
+    const sw=isSel?0.6:l.cat==="anomaly"?0.4:0.3;
+    const sd=l.cat==="anomaly"?"1,0.5":"none";
+    const op=vis?1:0.2;
+    h+=`<g class="station-rect" onclick="selectStation('${l.id}')" style="opacity:${op}">`;
+    h+=`<rect x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="0.5" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${sd}"/>`;
+    h+=`<text x="${l.x+l.w/2}" y="${l.y+l.h/2-0.5}" text-anchor="middle" dominant-baseline="central" fill="#f1f5f9" font-size="${l.w>8?1.3:1.1}" font-weight="600">${l.name.split("—")[0].trim().substring(0,18)}</text>`;
+    const badges=[];
+    if(l.hasPlc)badges.push({lb:"PLC",c:"#3b82f6"});if(l.hasPromess)badges.push({lb:"P",c:"#a855f7"});if(l.hasCognex)badges.push({lb:"V",c:"#22d3ee"});if(l.hasPointIO)badges.push({lb:"IO",c:"#14b8a6"});
+    badges.forEach((b,bi)=>{
+      h+=`<rect x="${l.x+0.5+bi*3}" y="${l.y+l.h-2.2}" width="2.5" height="1.6" rx="0.3" fill="${b.c}" opacity="0.85"/>`;
+      h+=`<text x="${l.x+1.75+bi*3}" y="${l.y+l.h-1.3}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="0.85" font-weight="700">${b.lb}</text>`;
+    });
+    if(l.cat==="anomaly")h+=`<text x="${l.x+l.w-1}" y="${l.y+1.5}" fill="#ef4444" font-size="2" font-weight="700">!</text>`;
+    h+=`</g>`;
+  });
+  svg.innerHTML=h;
+}
+
+function selectStation(id){
+  selectedId=selectedId===id?null:id;renderMap();
+  const p=document.getElementById("detailPanel");
+  if(!selectedId){p.classList.remove("visible");return}
+  const l=LOCS.find(x=>x.id===id);if(!l){p.classList.remove("visible");return}
+  let html=`<div class="detail-header"><div><div class="detail-title" style="color:${l.color}">${l.name}</div><div class="detail-zone">${l.zone}</div></div><button class="close-btn" onclick="selectStation('${id}')">✕</button></div>`;
+  html+=`<div class="badge-row">`;
+  if(l.hasPlc)html+=`<span class="badge" style="background:#1e3a8a;color:#93c5fd">PLC: ${l.plcModel}</span>`;
+  if(l.hasHmi)html+=`<span class="badge" style="background:#1e3a5f;color:#93c5fd">HMI: ${l.hmiModel}</span>`;
+  if(l.hasPromess)html+=`<span class="badge" style="background:#3b0764;color:#c4b5fd">Promess: ${l.promessModel}</span>`;
+  if(l.hasCognex)html+=`<span class="badge" style="background:#083344;color:#67e8f9">Cognex: ${l.cognexModel}</span>`;
+  if(l.hasPointIO)html+=`<span class="badge" style="background:#042f2e;color:#5eead4">Point I/O: ${l.pointIO}</span>`;
+  if(!l.hasPlc)html+=`<span class="badge" style="background:#1c1917;color:#a8a29e">NO MWES PLC</span>`;
+  html+=`</div><div class="two-col"><div>`;
+  html+=`<h3 class="section-title">HARDWARE & EQUIPMENT</h3>`;
+  if(l.hasPromess)html+=`<div class="hw-block"><div class="hw-label" style="color:#a855f7">PROMESS SERVO PRESS</div><div class="hw-val">${l.promessModel}</div><div class="hw-sub">Controller: ${l.promessCtrl}</div><div class="hw-sub">Frame: ${l.promessFrame}</div><div class="hw-sub">Max req: ${l.promessMax}</div></div>`;
+  if(l.hasCognex)html+=`<div class="hw-block"><div class="hw-label" style="color:#22d3ee">COGNEX VISION</div><div class="hw-val">${l.cognexModel}</div><div class="hw-warn">Programming: ${l.cognexProg}</div></div>`;
+  html+=`<div class="hw-block"><div class="hw-label" style="color:#f97316">TORQUE TOOLS</div><div class="hw-val">Count: ${l.torqueTools} | Range: ${l.torqueRange}</div><div class="hw-sub">Owner: ${l.torqueOwner}</div></div>`;
+  html+=`<div class="hw-block"><div class="hw-label" style="color:#16a34a">PIVOTWARE</div><div class="hw-val">${l.pivotware}</div>`;
+  if(l.pwInterface&&l.pwInterface!=="N/A")html+=`<div class="hw-warn">Interface: ${l.pwInterface}</div>`;
+  html+=`</div>`;
+  if(l.network)html+=`<div class="hw-block"><div class="hw-label" style="color:#94a3b8">NETWORK</div><div class="hw-val">${l.network}</div>${l.drives?`<div class="hw-sub">Drives: ${l.drives}</div>`:""}</div>`;
+  html+=`</div><div>`;
+  if(l.equipment){
+    html+=`<h3 class="section-title">EQUIPMENT LIST</h3>`;
+    l.equipment.forEach(e=>{html+=`<div class="eq-item">• ${e}</div>`});
+  }
+  if(l.concerns){
+    html+=`<h3 class="section-title red" style="margin-top:10px">CONCERNS & OPEN ISSUES (${l.concerns.length})</h3>`;
+    l.concerns.forEach(c=>{
+      const crit=c.includes("CRITICAL")||c.includes("RED FLAG")||c.includes("CONFLICT")||c.includes("RECOMMEND");
+      html+=`<div class="concern-item ${crit?"critical":""}">${c}</div>`;
+    });
+  }
+  html+=`</div></div>`;
+  p.innerHTML=html;p.style.borderColor=l.color;p.classList.add("visible");
+}
+
+function renderProjectConcerns(){
+  const d=document.getElementById("projectConcerns");
+  let h=`<h3>PROJECT-WIDE CONTROLS CONCERNS</h3>`;
+  PROJ_CONCERNS.forEach(c=>{
+    h+=`<div class="pc-item ${c.s}"><div class="pc-header"><span class="pc-title ${c.s}">${c.t}</span><span class="pc-sev ${c.s}">${c.s.toUpperCase()}</span></div><p class="pc-desc">${c.d}</p></div>`;
+  });
+  d.innerHTML=h;
+}
+
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>
