@@ -25,7 +25,7 @@ h1{font-size:22px;font-weight:700;color:#f8fafc}
 svg text{user-select:none;pointer-events:none}
 .station-group{cursor:pointer;transition:opacity 0.15s}
 .station-group:hover .station-fill{opacity:1!important;filter:brightness(1.3)}
-.station-group:hover .station-border{stroke-width:1!important;stroke:#f8fafc!important}
+.station-group:hover .station-border{stroke-width:0.8!important;stroke:#f8fafc!important}
 .detail-panel{background:#1e293b;border-radius:8px;padding:18px;margin-bottom:14px;display:none}
 .detail-panel.visible{display:block}
 .detail-header{display:flex;justify-content:space-between;align-items:flex-start}
@@ -77,7 +77,7 @@ svg text{user-select:none;pointer-events:none}
       <span class="cardinal">← EAST</span><span class="cardinal">WEST →</span>
     </div>
   </div>
-  <svg id="floorMap" viewBox="-4 -6 80 68" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-height:600px;display:block"></svg>
+  <svg id="floorMap" viewBox="-8 -12 160 88" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;min-height:620px;display:block"></svg>
   <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10px">
     <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#3b82f6"></span><span style="color:#94a3b8">PLC Station</span></span>
     <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:12px;height:12px;border-radius:2px;background:#a855f7"></span><span style="color:#94a3b8">Promess Press</span></span>
@@ -93,39 +93,18 @@ svg text{user-select:none;pointer-events:none}
 </div>
 
 <script>
-// Station data — x/y/w/h are in SVG units, scaled up for large clickable areas
+// Layout: viewBox 160 wide x 88 tall (with padding)
+// Row 1 (SOUTH, y=2):  sub-assy stations feeding Stn1 area
+// Row 2 (MAINLINE, y=28): Stn1, Stn2, Stn3
+// Row 3 (NORTH, y=54): sub-assy stations feeding Stn2/3 area
+// Right side (WEST): Front Housing + Rear Housing
+
+const BW=16, BH=11, GAP=4; // block width, height, gap
+
 const LOCS=[
-// === PLC STATIONS ===
-{id:"st1",name:"Station #1 — Mainline (Center Housing)",zone:"Mainline",
-x:16,y:24,w:14,h:12,color:"#2563eb",
-hasPlc:true,hasHmi:true,hasPromess:false,hasCognex:false,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
-drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",
-torqueTools:7,torqueRange:"58–265 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Incoming part rack with sensor lights and Pivotware I/O",
-pwInterface:"UNDEFINED — Major open question",
-equipment:["Clutch circuit pressure decay test (analog pressure, timed sequence)","Shift & spin test (servo-motor + shaft, 3 pneumatic valves, magnet shift sensors)","Housing buffer conveyor — OPTIONAL ($81.2K): 3 zones, VFD-controlled"],
-concerns:["CRITICAL: Pressure decay test requires analog input + timed pass/fail logic — confirm PLC I/O count","Shift & spin test requires Kinetix servo axis — confirm sizing","3 pneumatic valves need discrete outputs + position feedback","Magnet shift sensor signal type TBD (discrete? analog?)","Pivotware interface: 7 torque tools customer-supplied — who sequences them?","SCOPE CONFLICT: 'no data collection' but tests inherently generate pass/fail data"],
-cat:"plc-hmi",
-subLabel:"PLC + HMI\n7 Torque Tools\nPressure Decay Test\nShift & Spin Test"},
-
-{id:"mid-plate",name:"Mid-Plate Assembly & S13",zone:"Sub-Assembly — South (corrected)",
-x:2,y:42,w:14,h:12,color:"#7c3aed",
-hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
-plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
-drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
-promessModel:"EMAP-20/350/200 (20kN, 4,500 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
-promessMax:"14,500 N (3,260 lbs)",promessFrame:"H-Frame with pneumatic fixture shuttle",
-cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED — via CN process",
-torqueTools:4,torqueRange:"20–338 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Incoming part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["H-Frame press with pneumatic fixture shuttle","Promess EMAP-20 servo press (20kN)","Cognex 3816M vision camera","Pawl arm measurement (2 gauge blocks)","Rocker arm station (manual arbor press)","Tooling support rack with position sensors"],
-concerns:["Promess Ethernet/IP — confirm IP scheme and PLC handshake","UltraPRO generates force/distance curves — CNH expects data stored?","Cognex programming NOT included — budget risk for CN hours","Cognex integration: pass/fail gating via PLC or standalone?","Pneumatic fixture shuttle needs discrete I/O for extend/retract","Tooling rack position sensors — how many discrete inputs?"],
-cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 20kN\nCognex Vision\n4 Torque Tools"},
-
+// === ROW 1: SOUTH (top) — Sub-assemblies ===
 {id:"shaft",name:"Shaft Assembly — S18/S21/S25",zone:"Sub-Assembly — South",
-x:8,y:2,w:14,h:12,color:"#7c3aed",
+x:4,y:2,w:BW,h:BH,color:"#7c3aed",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
 drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
@@ -140,7 +119,7 @@ cat:"plc-hmi-promess-cognex",
 subLabel:"PLC + HMI + Promess 40kN\nCognex Vision\n3 Shaft Recipes"},
 
 {id:"s12-fp",name:"S12 & Front Plate Assembly",zone:"Sub-Assembly — South",
-x:24,y:2,w:14,h:12,color:"#7c3aed",
+x:24,y:2,w:BW,h:BH,color:"#7c3aed",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
 drives:"Ethernet/IP to Promess + auxiliary Kinetix servos",network:"Ethernet/IP",
@@ -152,10 +131,10 @@ pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
 equipment:["H-Frame press — LARGEST (60kN)","Aux axis #1: Press actuator (ball screw/servo)","Aux axis #2: Fixture positioning (ball screw/servo)","Cognex 3816M vision","Fork assembly fixture","S12 rolling torque test device (customer)"],
 concerns:["CRITICAL: 3 coordinated axes — Promess main + 2 auxiliary. Who controls aux axes?","If Kinetix drives aux axes, need CompactLogix 5380 minimum for multi-axis","S12 rolling torque test device (customer) — interface spec needed","HIGHEST I/O COUNT station — size PLC chassis accordingly","400 Nm max torque tool — confirm Pivotware controller compatibility"],
 cat:"plc-hmi-promess-cognex",
-subLabel:"PLC + HMI + Promess 60kN\nLARGEST PRESS\nCognex + Dual Aux Axes\n6 Torque Tools"},
+subLabel:"PLC + HMI + Promess 60kN\nLARGEST PRESS + Dual Aux\nCognex | 6 Torque Tools"},
 
 {id:"pump-drive",name:"Pump Drive Plate & Clutch",zone:"Sub-Assembly — South",
-x:40,y:2,w:14,h:12,color:"#9333ea",
+x:44,y:2,w:BW,h:BH,color:"#9333ea",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
 drives:"Ethernet/IP to Promess + dual aux axes",network:"Ethernet/IP",
@@ -169,8 +148,88 @@ concerns:["Dual aux axes — same architecture question as S12/Front Plate","Mul
 cat:"plc-hmi-promess-cognex",
 subLabel:"PLC + HMI + Promess 30kN\nCognex + Dual Aux Axes\n7 Torque Tools"},
 
+{id:"top-side",name:"Top & Side Plate Sub-Assembly",zone:"Sub-Assembly — South",
+x:64,y:2,w:BW,h:BH,color:"#475569",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:2,torqueRange:"23 & 10 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["Table with fixture","2 customer torque tools"],
+concerns:["No MWES controls — simplest station","Low torque, minimal fixturing"],
+cat:"no-plc",
+subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimplest Station"},
+
+// === ROW 2: MAINLINE (middle, y=28) ===
+{id:"st1",name:"Station #1 — Mainline (Center Housing)",zone:"Mainline",
+x:14,y:28,w:BW,h:BH,color:"#2563eb",
+hasPlc:true,hasHmi:true,hasPromess:false,hasCognex:false,hasPointIO:false,
+plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
+drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",
+torqueTools:7,torqueRange:"58–265 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Incoming part rack with sensor lights and Pivotware I/O",
+pwInterface:"UNDEFINED — Major open question",
+equipment:["Clutch circuit pressure decay test (analog pressure, timed sequence)","Shift & spin test (servo-motor + shaft, 3 pneumatic valves, magnet shift sensors)","Housing buffer conveyor — OPTIONAL ($81.2K): 3 zones, VFD-controlled"],
+concerns:["CRITICAL: Pressure decay test requires analog input + timed pass/fail logic — confirm PLC I/O count","Shift & spin test requires Kinetix servo axis — confirm sizing","3 pneumatic valves need discrete outputs + position feedback","Magnet shift sensor signal type TBD (discrete? analog?)","Pivotware interface: 7 torque tools customer-supplied — who sequences them?","SCOPE CONFLICT: 'no data collection' but tests inherently generate pass/fail data"],
+cat:"plc-hmi",
+subLabel:"PLC + HMI\n7 Torque Tools\nPressure Decay + Spin Test"},
+
+{id:"st2",name:"Station #2 — Mainline (Sub-Assy Install)",zone:"Mainline",
+x:38,y:28,w:BW,h:BH,color:"#475569",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:12,torqueRange:"45–2,000 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED — Pivotware owns ALL sequencing",
+equipment:["Guide rods for hydrostat installation","Table for amogel grease","12 customer torque tools (45–2,000 Nm!)"],
+concerns:["NO MWES PLC — 100% Pivotware-controlled","2,000 Nm max torque — confirm Pivotware compatibility","12 torque tools — HIGHEST COUNT, maximum Pivotware complexity","MWES has ZERO visibility into this station","Multiple heavy sub-assemblies: hydrostat 174.3 Kg, pump drive 205 Kg, ring gear 34.9 Kg"],
+cat:"no-plc",
+subLabel:"NO PLC — Pivotware Only\n12 Torque Tools (MOST)\n2,000 Nm Max Torque"},
+
+{id:"st3",name:"Station #3 — Mainline (Final Assembly)",zone:"Mainline",
+x:62,y:28,w:BW,h:BH,color:"#475569",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:8,torqueRange:"10–325 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["Sealant application (47606598)","Assembly guide pins — front (2) & rear (2) housing","Special tool to rotate fan pump drive gear","8 customer torque tools"],
+concerns:["NO MWES PLC — Pivotware-controlled","Front housing (496 Kg) + rear housing (522 Kg) join here — heaviest ops","Sealant application quality — who verifies?","Final assy ~1,239.8 Kg on cart at all orientations","No quality gate / sign-off PLC logic at final station"],
+cat:"no-plc",
+subLabel:"NO PLC — Pivotware Only\n8 Torque Tools\nFinal Assy 1,240 Kg"},
+
+// === ROW 3: NORTH (bottom, y=54) — Sub-assemblies ===
+{id:"mid-plate",name:"Mid-Plate Assembly & S13",zone:"Sub-Assembly — North",
+x:4,y:54,w:BW,h:BH,color:"#7c3aed",
+hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:true,hasPointIO:false,
+plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
+drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
+promessModel:"EMAP-20/350/200 (20kN, 4,500 lbs)",promessCtrl:"MotionPRO Controller + UltraPRO monitoring",
+promessMax:"14,500 N (3,260 lbs)",promessFrame:"H-Frame with pneumatic fixture shuttle",
+cognexModel:"Cognex 3816M with built-in LED",cognexProg:"NOT INCLUDED — via CN process",
+torqueTools:4,torqueRange:"20–338 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Incoming part rack with Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["H-Frame press with pneumatic fixture shuttle","Promess EMAP-20 servo press (20kN)","Cognex 3816M vision camera","Pawl arm measurement (2 gauge blocks)","Rocker arm station (manual arbor press)","Tooling support rack with position sensors"],
+concerns:["Promess Ethernet/IP — confirm IP scheme and PLC handshake","UltraPRO generates force/distance curves — CNH expects data stored?","Cognex programming NOT included — budget risk for CN hours","Cognex integration: pass/fail gating via PLC or standalone?","Pneumatic fixture shuttle needs discrete I/O for extend/retract","Tooling rack position sensors — how many discrete inputs?"],
+cat:"plc-hmi-promess-cognex",
+subLabel:"PLC + HMI + Promess 20kN\nCognex Vision\n4 Torque Tools"},
+
+{id:"shift-cyl",name:"Shift Cylinder Sub-Assembly",zone:"Sub-Assembly — North",
+x:24,y:54,w:BW,h:BH,color:"#dc2626",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",
+pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["Arbor press station","Functional test bench (pressure sensor)","Electronic bore measurement with PLC feedback"],
+concerns:["RED FLAG: Controls N/A but has 'bore measurement with PLC feedback'","Which PLC does bore gauge feed? Mid-plate? Needs its own?","RECOMMEND: Point I/O drop from mid-plate PLC","Functional test bench pressure sensor — manual or PLC?","No drawings provided — design TBD, controls scope could expand"],
+cat:"anomaly",
+subLabel:"⚠ ANOMALY\nControls N/A but needs\nPLC for bore measurement\nRESOLUTION REQUIRED"},
+
+{id:"hydrostat",name:"Hydrostat Sub-Assembly",zone:"Sub-Assembly — North",
+x:44,y:54,w:BW,h:BH,color:"#475569",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:3,torqueRange:"57–280 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["2 assembly/fixture carts","Hand-held pneumatic press with balancer"],
+concerns:["No MWES controls — Pivotware only","Pneumatic press: no force monitoring","Hydrostat 174.3 Kg — verify cart rating"],
+cat:"no-plc",
+subLabel:"NO PLC — Pivotware Only\n3 Torque Tools\nPneumatic Press (manual)"},
+
 {id:"ring-gear",name:"Ring Gear & Misc Sub-Assembly",zone:"Sub-Assembly — North",
-x:34,y:42,w:14,h:12,color:"#9333ea",
+x:64,y:54,w:BW,h:BH,color:"#9333ea",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12"',
 drives:"Ethernet/IP to Promess",network:"Ethernet/IP",
@@ -183,8 +242,19 @@ concerns:["No Cognex camera — only press station without vision. Intentional?"
 cat:"plc-hmi-promess",
 subLabel:"PLC + HMI + Promess 30kN\nNO Vision Camera\nSimplest PLC Station"},
 
+{id:"planetary",name:"Planetary & Misc Sub-Assembly",zone:"Sub-Assembly — North",
+x:84,y:54,w:BW,h:BH,color:"#475569",
+hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
+torqueTools:2,torqueRange:"8.9 & 57.3 Nm",torqueOwner:"Customer (CNH)",
+pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
+equipment:["Table with gear fixture","3 outer gear nests with dummy pins","Air hammer tools"],
+concerns:["No MWES controls — simple manual station","Low torque — straightforward Pivotware"],
+cat:"no-plc",
+subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimple Manual Station"},
+
+// === RIGHT SIDE (WEST): Housing areas ===
 {id:"front-hsg",name:"Front Housing Assembly",zone:"Front Housing — West",
-x:56,y:22,w:16,h:14,color:"#0d9488",
+x:104,y:20,w:BW+4,h:BH+2,color:"#0d9488",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:true,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
 drives:"PowerFlex VFDs or Kinetix servos",network:"Ethernet/IP",
@@ -196,10 +266,10 @@ pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
 equipment:["H-Frame press with aux axis fixture positioning","Promess EMAP-40 (40kN)","10 lower gear nests, 14 upper tools","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 8 ft","Roll-over device (0°/90°/180°)","4 LVDT shim measurement devices","Point I/O junction boxes","MFD rolling torque test device (customer)"],
 concerns:["ONLY STATION WITH POINT I/O — how many nodes? What's on Point I/O vs main chassis?","Roll-over device actuation — VFD or servo? 3 position stops with confirmation","4 LVDT shim measurements = 4 analog inputs — on Point I/O or main chassis?","CRITICAL: Shim values are quality data — conflicts with 'no data collection'","10 gear sub-assy operations — most tool changes of any press station","MOST COMPLEX controls station on the entire line","Housing 378 Kg — roll-over and conveyors sized with safety factor?"],
 cat:"plc-hmi-promess-pointio",
-subLabel:"PLC + HMI + Promess 40kN\nPoint I/O + 4 LVDTs\nRoll-Over + Conveyors\n9 Torque Tools\nMOST COMPLEX STATION"},
+subLabel:"PLC+HMI+Promess 40kN\nPoint I/O + 4 LVDTs\nRoll-Over + Conveyors\n9 Torque Tools\nMOST COMPLEX STATION"},
 
-{id:"rear-hsg",name:"Rear Housing Assembly",zone:"Rear Housing — North-West",
-x:56,y:42,w:16,h:12,color:"#f59e0b",
+{id:"rear-hsg",name:"Rear Housing Assembly",zone:"Rear Housing — West",
+x:104,y:42,w:BW+4,h:BH+2,color:"#f59e0b",
 hasPlc:true,hasHmi:true,hasPromess:true,hasCognex:false,hasPointIO:false,
 plcModel:"Allen-Bradley CompactLogix",hmiModel:'Rockwell OPTIX 12" on swing arm',
 drives:"PowerFlex VFDs",network:"Ethernet/IP",
@@ -210,68 +280,7 @@ pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
 equipment:["C-Frame press with fixture drawer","Promess EMAP-40 (40kN)","Buffer conveyor (2 motorized + 1 non-powered)","Assembly conveyor 36\" × 12 ft","Roll-over device (0°/90°/180°)","Tooling rack with position sensors","Output shaft rolling torque test (customer)","Charge pump addition (OPTION — TBD)"],
 concerns:["Identical conveyors to front housing but NO Point I/O specified — inconsistency","Roll-over device same control questions as front housing","Rolling torque test device interface undefined","Charge pump option could add I/O and programming scope","Torque tool count not specified — confirm with CNH","Housing 424 Kg + sub-assemblies on roll-over"],
 cat:"plc-hmi-promess",
-subLabel:"PLC + HMI + Promess 40kN\nRoll-Over + Conveyors\nNO Point I/O (inconsistency?)"},
-
-// === NO-PLC STATIONS ===
-{id:"st2",name:"Station #2 — Mainline (Sub-Assy Install)",zone:"Mainline",
-x:32,y:24,w:14,h:12,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:12,torqueRange:"45–2,000 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED — Pivotware owns ALL sequencing",
-equipment:["Guide rods for hydrostat installation","Table for amogel grease","12 customer torque tools (45–2,000 Nm!)"],
-concerns:["NO MWES PLC — 100% Pivotware-controlled","2,000 Nm max torque — confirm Pivotware compatibility","12 torque tools — HIGHEST COUNT, maximum Pivotware complexity","MWES has ZERO visibility into this station","Multiple heavy sub-assemblies: hydrostat 174.3 Kg, pump drive 205 Kg, ring gear 34.9 Kg"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n12 Torque Tools (MOST)\n2,000 Nm Max Torque"},
-
-{id:"st3",name:"Station #3 — Mainline (Final Assembly)",zone:"Mainline",
-x:48,y:24,w:14,h:12,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:8,torqueRange:"10–325 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with sensor lights & Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Sealant application (47606598)","Assembly guide pins — front (2) & rear (2) housing","Special tool to rotate fan pump drive gear","8 customer torque tools"],
-concerns:["NO MWES PLC — Pivotware-controlled","Front housing (496 Kg) + rear housing (522 Kg) join here — heaviest ops","Sealant application quality — who verifies?","Final assy ~1,239.8 Kg on cart at all orientations","No quality gate / sign-off PLC logic at final station"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n8 Torque Tools\nHousing Join Point\nFinal Assy 1,240 Kg"},
-
-{id:"hydrostat",name:"Hydrostat Sub-Assembly",zone:"Sub-Assembly — North",
-x:22,y:42,w:10,h:12,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:3,torqueRange:"57–280 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["2 assembly/fixture carts","Hand-held pneumatic press with balancer"],
-concerns:["No MWES controls — Pivotware only","Pneumatic press: no force monitoring","Hydrostat 174.3 Kg — verify cart rating"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n3 Torque Tools\nPneumatic Press (manual)"},
-
-{id:"planetary",name:"Planetary & Misc Sub-Assembly",zone:"Sub-Assembly — North",
-x:50,y:42,w:10,h:12,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:2,torqueRange:"8.9 & 57.3 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Table with gear fixture","3 outer gear nests with dummy pins","Air hammer tools"],
-concerns:["No MWES controls — simple manual station","Low torque — straightforward Pivotware"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimple Manual Station"},
-
-{id:"top-side",name:"Top & Side Plate Sub-Assembly",zone:"Sub-Assembly — South",
-x:56,y:2,w:12,h:12,color:"#475569",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:2,torqueRange:"23 & 10 Nm",torqueOwner:"Customer (CNH)",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Table with fixture","2 customer torque tools"],
-concerns:["No MWES controls — simplest station","Low torque, minimal fixturing"],
-cat:"no-plc",
-subLabel:"NO PLC — Pivotware Only\n2 Torque Tools\nSimplest Station"},
-
-{id:"shift-cyl",name:"Shift Cylinder Sub-Assembly",zone:"Sub-Assembly — North",
-x:10,y:42,w:10,h:12,color:"#dc2626",
-hasPlc:false,hasHmi:false,hasPromess:false,hasCognex:false,hasPointIO:false,
-torqueTools:0,torqueRange:"N/A",torqueOwner:"N/A",
-pivotware:"YES — Part rack with Pivotware I/O",pwInterface:"UNDEFINED",
-equipment:["Arbor press station","Functional test bench (pressure sensor)","Electronic bore measurement with PLC feedback"],
-concerns:["RED FLAG: Controls N/A but has 'bore measurement with PLC feedback'","Which PLC does bore gauge feed? Mid-plate? Needs its own?","RECOMMEND: Point I/O drop from mid-plate PLC","Functional test bench pressure sensor — manual or PLC?","No drawings provided — design TBD, controls scope could expand"],
-cat:"anomaly",
-subLabel:"⚠ ANOMALY\nControls: N/A but needs\nPLC for bore measurement\nRESOLUTION REQUIRED"}
+subLabel:"PLC+HMI+Promess 40kN\nRoll-Over + Conveyors\nNO Point I/O\n(inconsistency w/ Front Hsg?)"}
 ];
 
 const STATS_DATA=[
@@ -332,89 +341,106 @@ function renderMap(){
   const svg=document.getElementById("floorMap");
   const fl=getFiltered();const ids=new Set(fl.map(l=>l.id));
   let h='';
-  // Zone backgrounds
-  h+=`<rect x="0" y="0" width="72" height="18" rx="2" fill="#1e1b4b" opacity="0.3"/>`;
-  h+=`<rect x="0" y="20" width="72" height="18" rx="2" fill="#172554" opacity="0.3"/>`;
-  h+=`<rect x="0" y="40" width="72" height="18" rx="2" fill="#1a2e05" opacity="0.3"/>`;
 
-  // Zone labels
-  h+=`<text x="36" y="-2" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">SOUTH — Sub-Assembly Stations</text>`;
-  h+=`<text x="24" y="22.5" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">MAINLINE (EAST → WEST)</text>`;
-  h+=`<text x="28" y="40.5" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">NORTH — Sub-Assembly & Rear Housing</text>`;
-  h+=`<text x="64" y="19.5" fill="#64748b" font-size="1.8" text-anchor="middle" font-weight="700">WEST</text>`;
+  // Zone background bands
+  h+=`<rect x="0" y="-1" width="85" height="${BH+4}" rx="2" fill="#1e1b4b" opacity="0.25"/>`;
+  h+=`<rect x="0" y="${28-2}" width="85" height="${BH+4}" rx="2" fill="#172554" opacity="0.25"/>`;
+  h+=`<rect x="0" y="${54-2}" width="105" height="${BH+4}" rx="2" fill="#1a2e05" opacity="0.25"/>`;
+  h+=`<rect x="100" y="18" width="${BW+8}" height="40" rx="2" fill="#0c4a3e" opacity="0.2"/>`;
 
-  // Cardinal markers
-  h+=`<text x="-2.5" y="30" fill="#ef4444" font-size="3" font-weight="700">E</text>`;
-  h+=`<text x="73" y="30" fill="#ef4444" font-size="3" font-weight="700">W</text>`;
-  h+=`<text x="36" y="-4" fill="#ef4444" font-size="3" font-weight="700" text-anchor="middle">S</text>`;
-  h+=`<text x="36" y="61" fill="#ef4444" font-size="3" font-weight="700" text-anchor="middle">N</text>`;
+  // Row labels
+  h+=`<text x="42" y="-5" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">SOUTH — Sub-Assembly Stations (Feeding Mainline)</text>`;
+  h+=`<text x="42" y="24" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">MAINLINE — Cart Path (EAST → WEST)</text>`;
+  h+=`<text x="52" y="50" fill="#64748b" font-size="2.2" text-anchor="middle" font-weight="700">NORTH — Sub-Assembly Stations & Rear Housing</text>`;
+  h+=`<text x="${104+(BW+4)/2}" y="16" fill="#64748b" font-size="2" text-anchor="middle" font-weight="700">WEST — Housing Assembly</text>`;
+
+  // Cardinal direction markers
+  h+=`<text x="-5" y="35" fill="#ef4444" font-size="3.5" font-weight="700">E</text>`;
+  h+=`<text x="142" y="35" fill="#ef4444" font-size="3.5" font-weight="700">W</text>`;
+  h+=`<text x="60" y="-9" fill="#ef4444" font-size="3.5" font-weight="700" text-anchor="middle">S</text>`;
+  h+=`<text x="60" y="72" fill="#ef4444" font-size="3.5" font-weight="700" text-anchor="middle">N</text>`;
 
   // Cart path
-  h+=`<line x1="4" y1="37.5" x2="62" y2="37.5" stroke="#fbbf24" stroke-width="0.5" stroke-dasharray="2,1.5"/>`;
-  h+=`<text x="33" y="36.5" fill="#fbbf24" font-size="1.5" text-anchor="middle" font-weight="600">MAGNET TAPE CART PATH (~200 ft) — 7 CARTS — 48V</text>`;
+  h+=`<line x1="4" y1="26" x2="95" y2="26" stroke="#fbbf24" stroke-width="0.6" stroke-dasharray="2.5,1.5"/>`;
+  h+=`<text x="50" y="25" fill="#fbbf24" font-size="1.6" text-anchor="middle" font-weight="600">MAGNET TAPE CART PATH (~200 ft) — 7 CARTS — 48V Battery</text>`;
 
-  // Material flow arrows
+  // Material flow arrows (sub-assy → mainline)
   const arrows=[
-    {x1:9,y1:42,x2:22,y2:36,c:"#a78bfa",l:"Mid Plate 73.5 Kg"},
-    {x1:15,y1:42,x2:22,y2:36,c:"#a78bfa",l:"Shift Cyl"},
-    {x1:15,y1:14,x2:22,y2:24,c:"#a78bfa",l:"Shafts"},
-    {x1:31,y1:14,x2:28,y2:24,c:"#a78bfa",l:"S12/FP 214.5 Kg"},
-    {x1:47,y1:14,x2:38,y2:24,c:"#c084fc",l:"Pump Drive 205 Kg"},
-    {x1:27,y1:48,x2:38,y2:36,c:"#c084fc",l:"Hydrostat 174.3 Kg"},
-    {x1:41,y1:48,x2:40,y2:36,c:"#c084fc",l:"Ring Gear 34.9 Kg"},
-    {x1:55,y1:48,x2:44,y2:36,c:"#c084fc",l:"Planetary 39.1 Kg"},
-    {x1:62,y1:14,x2:54,y2:24,c:"#c084fc",l:"Top/Side Plates"},
-    {x1:64,y1:36,x2:56,y2:32,c:"#14b8a6",l:"Front Hsg 496 Kg"},
-    {x1:64,y1:42,x2:56,y2:34,c:"#fbbf24",l:"Rear Hsg 522 Kg"},
+    // South subs down to mainline
+    {x1:12,y1:13,x2:20,y2:28,c:"#a78bfa",l:"Shafts"},
+    {x1:32,y1:13,x2:24,y2:28,c:"#a78bfa",l:"S12/FP 214.5Kg"},
+    {x1:52,y1:13,x2:44,y2:28,c:"#c084fc",l:"Pump Drv 205Kg"},
+    {x1:72,y1:13,x2:68,y2:28,c:"#c084fc",l:"Top/Side"},
+    // North subs up to mainline
+    {x1:12,y1:54,x2:20,y2:39,c:"#a78bfa",l:"Mid Plate 73.5Kg"},
+    {x1:32,y1:54,x2:24,y2:39,c:"#a78bfa",l:"Shift Cyl 3.2Kg"},
+    {x1:52,y1:54,x2:44,y2:39,c:"#c084fc",l:"Hydro 174.3Kg"},
+    {x1:72,y1:54,x2:52,y2:39,c:"#c084fc",l:"Ring Gear 34.9Kg"},
+    {x1:92,y1:54,x2:56,y2:39,c:"#c084fc",l:"Planetary 39.1Kg"},
+    // Housing → Station 3
+    {x1:104,y1:30,x2:78,y2:33,c:"#14b8a6",l:"Front Hsg 496Kg"},
+    {x1:104,y1:48,x2:78,y2:36,c:"#fbbf24",l:"Rear Hsg 522Kg"},
   ];
   arrows.forEach(a=>{
-    h+=`<line x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" stroke="${a.c}" stroke-width="0.4" stroke-dasharray="1.5,1" opacity="0.4"/>`;
+    h+=`<line x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" stroke="${a.c}" stroke-width="0.5" stroke-dasharray="2,1.5" opacity="0.4"/>`;
+    const mx=(a.x1+a.x2)/2, my=(a.y1+a.y2)/2;
+    h+=`<text x="${mx+1}" y="${my-0.5}" fill="${a.c}" font-size="1.1" opacity="0.55">${a.l}</text>`;
   });
 
-  // Stations
+  // Render each station
   LOCS.forEach(l=>{
     const vis=ids.has(l.id);const isSel=selectedId===l.id;
-    const fill=isSel?l.color:vis?l.color+"99":l.color+"15";
-    const stroke=isSel?"#f8fafc":l.cat==="anomaly"?"#ef4444":vis?l.color+"cc":l.color+"33";
-    const sw=isSel?0.8:l.cat==="anomaly"?0.5:0.3;
-    const sd=l.cat==="anomaly"?"1.5,0.8":"none";
+    const fillColor=isSel?l.color:vis?l.color+"88":l.color+"15";
+    const strokeColor=isSel?"#f8fafc":l.cat==="anomaly"?"#ef4444":vis?l.color+"bb":l.color+"33";
+    const sw=isSel?0.8:l.cat==="anomaly"?0.6:0.3;
+    const sd=l.cat==="anomaly"?"2,1":"none";
     const op=vis?1:0.15;
 
     h+=`<g class="station-group" onclick="selectStation('${l.id}')" style="opacity:${op}">`;
-    // Clickable hit area (slightly larger)
-    h+=`<rect x="${l.x-0.5}" y="${l.y-0.5}" width="${l.w+1}" height="${l.h+1}" fill="transparent"/>`;
-    // Visible rect
-    h+=`<rect class="station-fill" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1" fill="${fill}" opacity="0.9"/>`;
-    h+=`<rect class="station-border" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${sd}"/>`;
+    // Invisible expanded hit area
+    h+=`<rect x="${l.x-1}" y="${l.y-1}" width="${l.w+2}" height="${l.h+2}" fill="transparent"/>`;
+    // Visible fill
+    h+=`<rect class="station-fill" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="${fillColor}" opacity="0.9"/>`;
+    // Border
+    h+=`<rect class="station-border" x="${l.x}" y="${l.y}" width="${l.w}" height="${l.h}" rx="1.2" fill="none" stroke="${strokeColor}" stroke-width="${sw}" stroke-dasharray="${sd}"/>`;
 
-    // Station name
+    // Station name (top of block)
     const name=l.name.split("—")[0].trim();
-    h+=`<text x="${l.x+l.w/2}" y="${l.y+2.8}" text-anchor="middle" fill="#f8fafc" font-size="1.6" font-weight="700">${name.length>20?name.substring(0,20):name}</text>`;
+    const displayName=name.length>22?name.substring(0,22)+"…":name;
+    h+=`<text x="${l.x+l.w/2}" y="${l.y+2.2}" text-anchor="middle" fill="#f8fafc" font-size="1.5" font-weight="700">${displayName}</text>`;
 
     // Sub-label lines
     if(l.subLabel){
       const lines=l.subLabel.split("\n");
       lines.forEach((ln,i)=>{
-        const isCrit=ln.includes("⚠")||ln.includes("MOST COMPLEX")||ln.includes("LARGEST")||ln.includes("ANOMALY")||ln.includes("HIGHEST");
-        h+=`<text x="${l.x+l.w/2}" y="${l.y+4.8+i*1.7}" text-anchor="middle" fill="${isCrit?"#fbbf24":"#94a3b8"}" font-size="${isCrit?1.2:1.15}" font-weight="${isCrit?600:400}">${ln}</text>`;
+        const isCrit=ln.includes("⚠")||ln.includes("MOST COMPLEX")||ln.includes("LARGEST")||ln.includes("ANOMALY")||ln.includes("HIGHEST")||ln.includes("RESOLUTION")||ln.includes("inconsistency");
+        h+=`<text x="${l.x+l.w/2}" y="${l.y+4+i*1.5}" text-anchor="middle" fill="${isCrit?"#fbbf24":"#94a3b8"}" font-size="${isCrit?'1.15':'1.05'}" font-weight="${isCrit?'600':'400'}">${ln}</text>`;
       });
     }
 
-    // Hardware badge strip at bottom
+    // Badge strip at bottom of block
     const badges=[];
     if(l.hasPlc)badges.push({lb:"PLC",c:"#3b82f6"});
     if(l.hasPromess)badges.push({lb:"PROMESS",c:"#a855f7"});
     if(l.hasCognex)badges.push({lb:"COGNEX",c:"#22d3ee"});
-    if(l.hasPointIO)badges.push({lb:"POINT I/O",c:"#14b8a6"});
-    if(!l.hasPlc&&l.cat!=="anomaly")badges.push({lb:"PIVOTWARE ONLY",c:"#475569"});
-    if(l.cat==="anomaly")badges.push({lb:"⚠ NEEDS RESOLUTION",c:"#dc2626"});
+    if(l.hasPointIO)badges.push({lb:"PT I/O",c:"#14b8a6"});
+    if(!l.hasPlc&&l.cat!=="anomaly")badges.push({lb:"PW ONLY",c:"#475569"});
+    if(l.cat==="anomaly")badges.push({lb:"⚠ RESOLVE",c:"#dc2626"});
 
-    const bw=l.w/(badges.length||1)-0.4;
-    badges.forEach((b,bi)=>{
-      const bx=l.x+0.2+bi*(bw+0.4);
-      h+=`<rect x="${bx}" y="${l.y+l.h-2.4}" width="${bw}" height="2" rx="0.4" fill="${b.c}" opacity="0.85"/>`;
-      h+=`<text x="${bx+bw/2}" y="${l.y+l.h-1.25}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="0.95" font-weight="700">${b.lb}</text>`;
-    });
+    if(badges.length>0){
+      const totalGap=0.3*(badges.length-1);
+      const bw=(l.w-0.6-totalGap)/badges.length;
+      badges.forEach((b,bi)=>{
+        const bx=l.x+0.3+bi*(bw+0.3);
+        h+=`<rect x="${bx}" y="${l.y+l.h-2.2}" width="${bw}" height="1.8" rx="0.4" fill="${b.c}" opacity="0.85"/>`;
+        h+=`<text x="${bx+bw/2}" y="${l.y+l.h-1.15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="0.9" font-weight="700">${b.lb}</text>`;
+      });
+    }
+
+    // Anomaly exclamation
+    if(l.cat==="anomaly"){
+      h+=`<text x="${l.x+l.w-1.5}" y="${l.y+2}" fill="#ef4444" font-size="2.5" font-weight="700">!</text>`;
+    }
 
     h+=`</g>`;
   });
