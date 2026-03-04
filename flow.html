@@ -213,23 +213,29 @@
       return(
         <div style={{width:"100%",height:"100vh",background:BRAND.navy,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}}>
 
-          {/* ═══ SLIM TOOLBAR (no header — parent nav provides branding) ═══ */}
-          <div style={{background:BRAND.navyDark,borderBottom:`1px solid rgba(59,177,73,0.15)`,padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,height:36}}>
-            <div style={{display:"flex",alignItems:"center",gap:6}}>
-              <button onClick={ftv} style={bs}>Fit View</button>
-              <button onClick={()=>setTf(t=>({...t,scale:Math.min(4,t.scale*1.3)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>+</button>
-              <button onClick={()=>setTf(t=>({...t,scale:Math.max(0.15,t.scale*0.77)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>−</button>
-              <span style={{color:"rgba(255,255,255,0.3)",fontSize:10,marginLeft:8}}>{Math.round(tf.scale*100)}%</span>
-            </div>
-            <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-              <span style={{color:BRAND.orange,fontSize:9,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5}}>LEGEND:</span>
-              {Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=><div key={k} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:k==="decision"?8:10,height:k==="decision"?8:10,background:c.color,borderRadius:k==="decision"?0:2,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.08)"}}/><span style={{color:"rgba(255,255,255,0.45)",fontSize:9,fontWeight:500,whiteSpace:"nowrap"}}>{c.label}</span></div>)}
-              <div style={{display:"flex",alignItems:"center",gap:4}}><svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3" stroke={BRAND.green} strokeWidth="1.5" strokeDasharray="3,2" opacity="0.5"/></svg><span style={{color:"rgba(255,255,255,0.45)",fontSize:9,fontWeight:500}}>SUB-ASSY FEED</span></div>
-            </div>
-          </div>
-
           {/* ═══ CANVAS ═══ */}
           <div ref={cRef} style={{flex:1,position:"relative",cursor:drag?"grabbing":"grab",touchAction:"none",background:`radial-gradient(ellipse at 25% 35%, rgba(59,177,73,0.03) 0%, transparent 55%), ${BRAND.navy}`}} onMouseDown={md} onMouseMove={mm} onMouseUp={mu} onMouseLeave={mu} onTouchStart={ts} onTouchMove={tmv} onTouchEnd={te}>
+
+            {/* ═══ FLOATING LEGEND ═══ */}
+            <div style={{position:"absolute",top:12,left:12,background:"rgba(28,38,54,0.92)",backdropFilter:"blur(8px)",border:"1px solid rgba(59,177,73,0.2)",borderRadius:6,padding:"10px 14px",zIndex:50,display:"flex",flexDirection:"column",gap:6}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:BRAND.orange,letterSpacing:1.5,marginBottom:2}}>LEGEND</div>
+              {Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=>
+                <div key={k} style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{width:k==="decision"?10:14,height:k==="decision"?10:14,background:c.color,borderRadius:k==="decision"?0:3,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.1)"}}/>
+                  <span style={{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}}>{c.label}</span>
+                </div>
+              )}
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <svg width="14" height="8" style={{flexShrink:0}}><line x1="0" y1="4" x2="14" y2="4" stroke={BRAND.green} strokeWidth="2" strokeDasharray="4,3" opacity="0.6"/></svg>
+                <span style={{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}}>SUB-ASSY FEED</span>
+              </div>
+              <div style={{borderTop:"1px solid rgba(59,177,73,0.15)",paddingTop:6,marginTop:2,display:"flex",gap:4}}>
+                <button onClick={ftv} style={bs}>Fit View</button>
+                <button onClick={()=>setTf(t=>({...t,scale:Math.min(4,t.scale*1.3)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>+</button>
+                <button onClick={()=>setTf(t=>({...t,scale:Math.max(0.15,t.scale*0.77)}))} style={{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}}>−</button>
+                <span style={{color:"rgba(255,255,255,0.25)",fontSize:9,display:"flex",alignItems:"center",marginLeft:4}}>{Math.round(tf.scale*100)}%</span>
+              </div>
+            </div>
             <svg width="100%" height="100%" style={{position:"absolute",top:0,left:0}}>
               <defs>
                 <marker id="aw" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="rgba(255,255,255,0.3)"/></marker>
