@@ -33,11 +33,9 @@
         const buf=await resp.arrayBuffer();
         const wb=XLSX.read(buf,{type:'array'});
         window._FLOW_DATA=parseWorkbook(wb);
-        // Now load the React app
-        const script=document.createElement('script');
-        script.type='text/babel';
-        script.text=REACT_APP_SOURCE;
-        document.body.appendChild(script);
+        // Compile and execute the React app
+        const compiled=Babel.transform(REACT_APP_SOURCE,{presets:['react','env']}).code;
+        new Function(compiled)();
       }catch(e){
         document.getElementById('root').innerHTML='<div class="error-screen">⚠ '+e.message+'<br><br>Make sure <strong>flow-data.xlsx</strong> is in the same folder as flow.html</div>';
       }
