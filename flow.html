@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -15,196 +14,195 @@
     body{font-family:'Montserrat','Segoe UI',sans-serif;background:#283549}
     ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
     ::-webkit-scrollbar-thumb{background:rgba(59,177,73,0.35);border-radius:3px}
-    ::-webkit-scrollbar-thumb:hover{background:rgba(59,177,73,0.55)}
     button:hover{filter:brightness(1.15)}button:active{transform:scale(0.97)}
-    .loading-screen{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:#283549;color:#3BB149;font-family:'Oswald',sans-serif;font-size:18px;letter-spacing:2px}
-    .error-screen{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:#283549;color:#f87171;font-family:'Montserrat',sans-serif;font-size:14px;text-align:center;padding:40px}
   </style>
 </head>
 <body>
-  <div id="root"><div class="loading-screen">LOADING FLOW DATA...</div></div>
-
+  <div id="root"></div>
   <script>
-    // Load Excel data, then boot React
-    async function loadAndRender(){
-      try{
-        const resp=await fetch('flow-data.xlsx');
-        if(!resp.ok)throw new Error('Could not load flow-data.xlsx ('+resp.status+')');
-        const buf=await resp.arrayBuffer();
-        const wb=XLSX.read(buf,{type:'array'});
-        window._FLOW_DATA=parseWorkbook(wb);
-        // Compile and execute the React app
-        const compiled=Babel.transform(REACT_APP_SOURCE,{presets:['react','env']}).code;
-        new Function(compiled)();
-      }catch(e){
-        document.getElementById('root').innerHTML='<div class="error-screen">⚠ '+e.message+'<br><br>Make sure <strong>flow-data.xlsx</strong> is in the same folder as flow.html</div>';
-      }
-    }
+    var h=React.createElement, BRAND={green:"#3BB149",navy:"#283549",orange:"#D07A08",navyDark:"#1c2636",navyLight:"#344863"};
+
+    // Loading screen
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      h("div",{style:{width:"100%",height:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#283549",color:"#3BB149",fontFamily:"'Oswald',sans-serif",fontSize:18,letterSpacing:2}},"LOADING FLOW DATA...")
+    );
 
     function parseWorkbook(wb){
-      const toObj=(name)=>{const ws=wb.Sheets[name];return ws?XLSX.utils.sheet_to_json(ws,{defval:''}):[]};
-      const toArr=(name)=>{const ws=wb.Sheets[name];return ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:''}):[]};
+      var toObj=function(name){var ws=wb.Sheets[name];return ws?XLSX.utils.sheet_to_json(ws,{defval:""}):[]};
+      var toArr=function(name){var ws=wb.Sheets[name];return ws?XLSX.utils.sheet_to_json(ws,{header:1,defval:""}):[]};
 
-      // Categories
-      const catRows=toObj('Categories');
-      const categories={};
-      catRows.forEach(r=>{categories[r.Key]={label:r.Label,color:r.Color,text:r['Text Color']}});
+      var catRows=toObj("Categories"), categories={};
+      catRows.forEach(function(r){categories[r.Key]={label:r.Label,color:r.Color,text:r["Text Color"]}});
 
-      // Nodes
-      const nodeRows=toObj('Nodes');
-      const nodes=nodeRows.map(r=>({
-        id:String(r.ID),label:String(r.Label),cat:String(r.Category),
-        x:Number(r.X),y:Number(r.Y),w:Number(r.Width),h:Number(r.Height),
-        diamond:String(r.Diamond).toUpperCase()==='YES',
-        zone:String(r.Zone).toUpperCase()==='YES'
-      }));
+      var nodeRows=toObj("Nodes");
+      var nodes=nodeRows.map(function(r){return{id:String(r.ID),label:String(r.Label),cat:String(r.Category),x:Number(r.X),y:Number(r.Y),w:Number(r.Width),h:Number(r.Height),diamond:String(r.Diamond).toUpperCase()==="YES",zone:String(r.Zone).toUpperCase()==="YES"}});
 
-      // Edges
-      const edgeRows=toObj('Edges');
-      const edges=edgeRows.map(r=>({
-        from:String(r.From),to:String(r.To),
-        label:r.Label?String(r.Label):'',
-        dashed:String(r.Dashed).toUpperCase()==='YES'
-      }));
+      var edgeRows=toObj("Edges");
+      var edges=edgeRows.map(function(r){return{from:String(r.From),to:String(r.To),label:r.Label?String(r.Label):"",dashed:String(r.Dashed).toUpperCase()==="YES"}});
 
-      // Details
-      const detRows=toObj('Details');
-      const details={};
-      detRows.forEach(r=>{
-        const ops=String(r.Operations||'').split('\n').filter(s=>s.trim());
-        details[String(r['Node ID'])]={
-          title:r.Title,part:r['Part Number'],controls:r.Controls,
-          operations:ops,equipment:r.Equipment,custEquip:r['Customer Equipment']
-        };
+      var detRows=toObj("Details"), details={};
+      detRows.forEach(function(r){
+        var ops=String(r.Operations||"").split("\n").filter(function(s){return s.trim()});
+        details[String(r["Node ID"])]={title:r.Title,part:r["Part Number"],controls:r.Controls,operations:ops,equipment:r.Equipment,custEquip:r["Customer Equipment"]};
       });
 
-      // Zones
-      const zoneArr=toArr('Zones');
-      const zones=[];
-      for(let i=1;i<zoneArr.length;i++){
-        const r=zoneArr[i];
-        if(r.length>=6)zones.push({x:Number(r[0]),y:Number(r[1]),w:Number(r[2]),h:Number(r[3]),b:String(r[4]),fo:Number(r[5])});
-      }
+      var zoneArr=toArr("Zones"), zones=[];
+      for(var i=1;i<zoneArr.length;i++){var r=zoneArr[i];if(r.length>=6)zones.push({x:Number(r[0]),y:Number(r[1]),w:Number(r[2]),h:Number(r[3]),b:String(r[4]),fo:Number(r[5])})}
 
-      return{categories,nodes,edges,details,zones};
+      return{categories:categories,nodes:nodes,edges:edges,details:details,zones:zones};
     }
-
-    // React app as a string — executed after data loads
-    const REACT_APP_SOURCE=`
-    const{useState,useRef,useCallback,useEffect}=React;
-    const BRAND={green:"#3BB149",navy:"#283549",orange:"#D07A08",gray:"#E9E9E9",navyLight:"#344863",navyDark:"#1c2636",white:"#ffffff"};
-    const DATA=window._FLOW_DATA;
-    const CATEGORIES=DATA.categories;
-    const nodes=DATA.nodes;
-    const edges=DATA.edges;
-    const details=DATA.details;
-    const zn=DATA.zones;
 
     function gc(n){return{x:n.x+n.w/2,y:n.y+n.h/2}}
     function ep(f,t){
-      const fc=gc(f),tc=gc(t),dx=tc.x-fc.x,dy=tc.y-fc.y;let sx,sy,ex,ey;
+      var fc=gc(f),tc=gc(t),dx=tc.x-fc.x,dy=tc.y-fc.y,sx,sy,ex,ey;
       if(Math.abs(dx)>Math.abs(dy)){if(dx>0){sx=f.x+f.w;sy=fc.y;ex=t.x;ey=tc.y}else{sx=f.x;sy=fc.y;ex=t.x+t.w;ey=tc.y}}
       else{if(dy>0){sx=fc.x;sy=f.y+f.h;ex=tc.x;ey=t.y}else{sx=fc.x;sy=f.y;ex=tc.x;ey=t.y+t.h}}
-      if(Math.abs(sx-ex)<5||Math.abs(sy-ey)<5)return\`M\${sx},\${sy} L\${ex},\${ey}\`;
-      if(Math.abs(dx)>Math.abs(dy)){const mx=(sx+ex)/2;return\`M\${sx},\${sy} L\${mx},\${sy} L\${mx},\${ey} L\${ex},\${ey}\`;}
-      const my=(sy+ey)/2;return\`M\${sx},\${sy} L\${sx},\${my} L\${ex},\${my} L\${ex},\${ey}\`;
+      if(Math.abs(sx-ex)<5||Math.abs(sy-ey)<5)return"M"+sx+","+sy+" L"+ex+","+ey;
+      if(Math.abs(dx)>Math.abs(dy)){var mx=(sx+ex)/2;return"M"+sx+","+sy+" L"+mx+","+sy+" L"+mx+","+ey+" L"+ex+","+ey}
+      var my=(sy+ey)/2;return"M"+sx+","+sy+" L"+sx+","+my+" L"+ex+","+my+" L"+ex+","+ey;
     }
 
-    function App(){
-      const cRef=useRef(null);
-      const[tf,setTf]=useState({x:0,y:0,scale:1});
-      const[drag,setDrag]=useState(false);
-      const dsRef=useRef({x:0,y:0});
-      const tfRef=useRef(tf);
-      const[sel,setSel]=useState(null);
-      const[hov,setHov]=useState(null);
-      const nm={};nodes.forEach(n=>nm[n.id]=n);
-      useEffect(()=>{tfRef.current=tf},[tf]);
+    function buildApp(DATA){
+      var useState=React.useState,useRef=React.useRef,useCallback=React.useCallback,useEffect=React.useEffect;
+      var CATEGORIES=DATA.categories, nodes=DATA.nodes, edges=DATA.edges, details=DATA.details, zn=DATA.zones;
+      var nm={};nodes.forEach(function(n){nm[n.id]=n});
 
-      const hw=useCallback((e)=>{e.preventDefault();const d=e.deltaY>0?0.9:1.1,t=tfRef.current,ns=Math.max(0.15,Math.min(4,t.scale*d)),r=cRef.current.getBoundingClientRect(),cx=e.clientX-r.left,cy=e.clientY-r.top;setTf({scale:ns,x:cx-(cx-t.x)*(ns/t.scale),y:cy-(cy-t.y)*(ns/t.scale)})},[]);
-      useEffect(()=>{const el=cRef.current;if(el)el.addEventListener("wheel",hw,{passive:false});return()=>el&&el.removeEventListener("wheel",hw)},[hw]);
+      function App(){
+        var tfState=useState({x:0,y:0,scale:1}),tf=tfState[0],setTf=tfState[1];
+        var dragState=useState(false),drag=dragState[0],setDrag=dragState[1];
+        var selState=useState(null),sel=selState[0],setSel=selState[1];
+        var hovState=useState(null),hov=hovState[0],setHov=hovState[1];
+        var cRef=useRef(null),dsRef=useRef({x:0,y:0}),tfRef=useRef(tf),tRef=useRef({ld:null});
 
-      const md=(e)=>{if(e.target.closest(".nd"))return;setDrag(true);dsRef.current={x:e.clientX-tf.x,y:e.clientY-tf.y}};
-      const mm=(e)=>{if(drag)setTf(t=>({...t,x:e.clientX-dsRef.current.x,y:e.clientY-dsRef.current.y}))};
-      const mu=()=>setDrag(false);
-      const tRef=useRef({ld:null});
-      const ts=(e)=>{if(e.touches.length===1){setDrag(true);dsRef.current={x:e.touches[0].clientX-tf.x,y:e.touches[0].clientY-tf.y}}if(e.touches.length===2){const dx2=e.touches[0].clientX-e.touches[1].clientX,dy2=e.touches[0].clientY-e.touches[1].clientY;tRef.current.ld=Math.sqrt(dx2*dx2+dy2*dy2)}};
-      const tmv=(e)=>{e.preventDefault();if(e.touches.length===1&&drag)setTf(t=>({...t,x:e.touches[0].clientX-dsRef.current.x,y:e.touches[0].clientY-dsRef.current.y}));if(e.touches.length===2&&tRef.current.ld){const dx2=e.touches[0].clientX-e.touches[1].clientX,dy2=e.touches[0].clientY-e.touches[1].clientY,dist=Math.sqrt(dx2*dx2+dy2*dy2),dl=dist/tRef.current.ld,cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2,r=cRef.current.getBoundingClientRect(),px=cx-r.left,py=cy-r.top;setTf(t=>{const ns=Math.max(0.15,Math.min(4,t.scale*dl));return{scale:ns,x:px-(px-t.x)*(ns/t.scale),y:py-(py-t.y)*(ns/t.scale)}});tRef.current.ld=dist}};
-      const te=()=>{setDrag(false);tRef.current.ld=null};
+        useEffect(function(){tfRef.current=tf},[tf]);
 
-      const ftv=useCallback(()=>{if(!cRef.current)return;const r=cRef.current.getBoundingClientRect(),p=60,x1=Math.min(...nodes.map(n=>n.x))-p,y1=Math.min(...nodes.map(n=>n.y))-p,x2=Math.max(...nodes.map(n=>n.x+n.w))+p,y2=Math.max(...nodes.map(n=>n.y+n.h))+p,cw=x2-x1,ch=y2-y1,s=Math.min(r.width/cw,r.height/ch,1.5);setTf({scale:s,x:(r.width-cw*s)/2-x1*s,y:(r.height-ch*s)/2-y1*s})},[]);
-      useEffect(()=>{const t=setTimeout(ftv,150);window.addEventListener("resize",ftv);return()=>{clearTimeout(t);window.removeEventListener("resize",ftv)}},[ftv]);
+        var hw=useCallback(function(e){
+          e.preventDefault();var d=e.deltaY>0?0.9:1.1,t=tfRef.current,ns=Math.max(0.15,Math.min(4,t.scale*d));
+          var r=cRef.current.getBoundingClientRect(),cx=e.clientX-r.left,cy=e.clientY-r.top;
+          setTf({scale:ns,x:cx-(cx-t.x)*(ns/t.scale),y:cy-(cy-t.y)*(ns/t.scale)});
+        },[]);
+        useEffect(function(){var el=cRef.current;if(el)el.addEventListener("wheel",hw,{passive:false});return function(){if(el)el.removeEventListener("wheel",hw)}},[hw]);
 
-      const bs={background:"rgba(59,177,73,0.15)",border:"1px solid rgba(59,177,73,0.3)",color:BRAND.green,padding:"4px 12px",borderRadius:4,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1,textTransform:"uppercase",transition:"all 0.15s ease"};
+        var md=function(e){if(e.target.closest(".nd"))return;setDrag(true);dsRef.current={x:e.clientX-tf.x,y:e.clientY-tf.y}};
+        var mm=function(e){if(drag)setTf(function(t){return{x:e.clientX-dsRef.current.x,y:e.clientY-dsRef.current.y,scale:t.scale}})};
+        var mu=function(){setDrag(false)};
+        var ts=function(e){if(e.touches.length===1){setDrag(true);dsRef.current={x:e.touches[0].clientX-tf.x,y:e.touches[0].clientY-tf.y}}if(e.touches.length===2){var dx2=e.touches[0].clientX-e.touches[1].clientX,dy2=e.touches[0].clientY-e.touches[1].clientY;tRef.current.ld=Math.sqrt(dx2*dx2+dy2*dy2)}};
+        var tmv=function(e){e.preventDefault();if(e.touches.length===1&&drag)setTf(function(t){return{x:e.touches[0].clientX-dsRef.current.x,y:e.touches[0].clientY-dsRef.current.y,scale:t.scale}});if(e.touches.length===2&&tRef.current.ld){var dx2=e.touches[0].clientX-e.touches[1].clientX,dy2=e.touches[0].clientY-e.touches[1].clientY,dist=Math.sqrt(dx2*dx2+dy2*dy2),dl=dist/tRef.current.ld,cx=(e.touches[0].clientX+e.touches[1].clientX)/2,cy=(e.touches[0].clientY+e.touches[1].clientY)/2,r=cRef.current.getBoundingClientRect(),px=cx-r.left,py=cy-r.top;setTf(function(t){var ns=Math.max(0.15,Math.min(4,t.scale*dl));return{scale:ns,x:px-(px-t.x)*(ns/t.scale),y:py-(py-t.y)*(ns/t.scale)}});tRef.current.ld=dist}};
+        var te=function(){setDrag(false);tRef.current.ld=null};
 
-      const rn=(n)=>{
-        if(n.zone)return React.createElement("g",{key:n.id},React.createElement("rect",{x:n.x,y:n.y,width:n.w,height:n.h,rx:4,fill:BRAND.green,opacity:0.9}),React.createElement("text",{x:n.x+n.w/2,y:n.y+n.h/2+1,textAnchor:"middle",dominantBaseline:"central",fill:"#fff",fontSize:"13",fontWeight:"700",letterSpacing:"2",style:{fontFamily:"'Oswald',sans-serif"}},n.label));
-        const c=CATEGORIES[n.cat]||{color:"#666",text:"#fff",label:"?"};const ih=hov===n.id;const is=sel===n.id;const hd=!!details[n.id];const cx2=n.x+n.w/2;const cy2=n.y+n.h/2;
-        if(n.diamond){const hw2=n.w/2,hh=n.h/2;return React.createElement("g",{key:n.id,className:"nd",style:{cursor:hd?"pointer":"default"},onClick:()=>hd&&setSel(n.id),onMouseEnter:()=>setHov(n.id),onMouseLeave:()=>setHov(null)},React.createElement("polygon",{points:cx2+","+(cy2-hh)+" "+(cx2+hw2)+","+cy2+" "+cx2+","+(cy2+hh)+" "+(cx2-hw2)+","+cy2,fill:c.color,stroke:is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.25)",strokeWidth:is?3:ih?2.5:1.5,filter:ih?"url(#mg)":undefined}),n.label.split("\\n").map((l,i,a)=>React.createElement("text",{key:i,x:cx2,y:cy2+(i-(a.length-1)/2)*14,textAnchor:"middle",dominantBaseline:"central",fill:c.text,fontSize:"11",fontWeight:"600",style:{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}},l)))}
-        return React.createElement("g",{key:n.id,className:"nd",style:{cursor:hd?"pointer":"default"},onClick:()=>hd&&setSel(n.id),onMouseEnter:()=>setHov(n.id),onMouseLeave:()=>setHov(null)},React.createElement("rect",{x:n.x,y:n.y,width:n.w,height:n.h,rx:5,fill:c.color,stroke:is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.15)",strokeWidth:is?3:ih?2.5:1,filter:ih?"url(#mg)":undefined}),hd&&React.createElement("rect",{x:n.x+n.w-19,y:n.y+3,width:15,height:15,rx:3,fill:"rgba(255,255,255,0.2)"}),hd&&React.createElement("text",{x:n.x+n.w-11.5,y:n.y+12.5,textAnchor:"middle",dominantBaseline:"central",fill:"rgba(255,255,255,0.8)",fontSize:"9",style:{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}},"i"),n.label.split("\\n").map((l,i,a)=>React.createElement("text",{key:i,x:cx2,y:cy2+(i-(a.length-1)/2)*14,textAnchor:"middle",dominantBaseline:"central",fill:c.text,fontSize:"11",fontWeight:"600",style:{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}},l)))
-      };
+        var ftv=useCallback(function(){
+          if(!cRef.current)return;var r=cRef.current.getBoundingClientRect(),p=60;
+          var x1=Math.min.apply(null,nodes.map(function(n){return n.x}))-p,y1=Math.min.apply(null,nodes.map(function(n){return n.y}))-p;
+          var x2=Math.max.apply(null,nodes.map(function(n){return n.x+n.w}))+p,y2=Math.max.apply(null,nodes.map(function(n){return n.y+n.h}))+p;
+          var cw=x2-x1,ch=y2-y1,s=Math.min(r.width/cw,r.height/ch,1.5);
+          setTf({scale:s,x:(r.width-cw*s)/2-x1*s,y:(r.height-ch*s)/2-y1*s});
+        },[]);
+        useEffect(function(){var t=setTimeout(ftv,200);window.addEventListener("resize",ftv);return function(){clearTimeout(t);window.removeEventListener("resize",ftv)}},[ftv]);
 
-      const re=(e,i)=>{const f=nm[e.from],t=nm[e.to];if(!f||!t)return null;const p=ep(f,t);const fl=e.label==="Fail"||e.label==="No Good"||e.label==="Re-shim";return React.createElement("g",{key:"e"+i},React.createElement("path",{d:p,fill:"none",stroke:e.dashed?"rgba(59,177,73,0.4)":"rgba(255,255,255,0.22)",strokeWidth:e.dashed?1.5:2,strokeDasharray:e.dashed?"6,4":undefined,markerEnd:e.dashed?"url(#ag)":"url(#aw)"}),e.label&&(()=>{const fc2=gc(f),tc2=gc(t);return React.createElement("text",{x:(fc2.x+tc2.x)/2,y:(fc2.y+tc2.y)/2-6,textAnchor:"middle",fontSize:"9",fontWeight:"700",fill:fl?"#EF5350":BRAND.green,style:{fontFamily:"'Montserrat',sans-serif"}},e.label)})())};
+        var bs={background:"rgba(59,177,73,0.15)",border:"1px solid rgba(59,177,73,0.3)",color:BRAND.green,padding:"4px 12px",borderRadius:4,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1,textTransform:"uppercase",transition:"all 0.15s ease"};
 
-      const dd=sel?details[sel]:null;
+        var rn=function(n){
+          if(n.zone)return h("g",{key:n.id},h("rect",{x:n.x,y:n.y,width:n.w,height:n.h,rx:4,fill:BRAND.green,opacity:0.9}),h("text",{x:n.x+n.w/2,y:n.y+n.h/2+1,textAnchor:"middle",dominantBaseline:"central",fill:"#fff",fontSize:"13",fontWeight:"700",letterSpacing:"2",style:{fontFamily:"'Oswald',sans-serif"}},n.label));
+          var c=CATEGORIES[n.cat]||{color:"#666",text:"#fff"};var ih=hov===n.id,is=sel===n.id,hd=!!details[n.id],cx2=n.x+n.w/2,cy2=n.y+n.h/2;
+          var labels=n.label.split("\n").map(function(l,i,a){return h("text",{key:i,x:cx2,y:cy2+(i-(a.length-1)/2)*14,textAnchor:"middle",dominantBaseline:"central",fill:c.text,fontSize:"11",fontWeight:"600",style:{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}},l)});
+          if(n.diamond){var hw2=n.w/2,hh=n.h/2;return h("g",{key:n.id,className:"nd",style:{cursor:hd?"pointer":"default"},onClick:function(){if(hd)setSel(n.id)},onMouseEnter:function(){setHov(n.id)},onMouseLeave:function(){setHov(null)}},h("polygon",{points:cx2+","+(cy2-hh)+" "+(cx2+hw2)+","+cy2+" "+cx2+","+(cy2+hh)+" "+(cx2-hw2)+","+cy2,fill:c.color,stroke:is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.25)",strokeWidth:is?3:ih?2.5:1.5,filter:ih?"url(#mg)":undefined}),labels)}
+          var elems=[h("rect",{key:"bg",x:n.x,y:n.y,width:n.w,height:n.h,rx:5,fill:c.color,stroke:is?BRAND.green:ih?BRAND.orange:"rgba(0,0,0,0.15)",strokeWidth:is?3:ih?2.5:1,filter:ih?"url(#mg)":undefined})];
+          if(hd){elems.push(h("rect",{key:"ib",x:n.x+n.w-19,y:n.y+3,width:15,height:15,rx:3,fill:"rgba(255,255,255,0.2)"}));elems.push(h("text",{key:"ii",x:n.x+n.w-11.5,y:n.y+12.5,textAnchor:"middle",dominantBaseline:"central",fill:"rgba(255,255,255,0.8)",fontSize:"9",style:{fontFamily:"'Montserrat',sans-serif",pointerEvents:"none"}},"i"))}
+          return h("g",{key:n.id,className:"nd",style:{cursor:hd?"pointer":"default"},onClick:function(){if(hd)setSel(n.id)},onMouseEnter:function(){setHov(n.id)},onMouseLeave:function(){setHov(null)}},elems.concat(labels));
+        };
 
-      return React.createElement("div",{style:{width:"100%",height:"100vh",background:BRAND.navy,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}},
+        var re=function(e,i){
+          var f=nm[e.from],t=nm[e.to];if(!f||!t)return null;var p=ep(f,t);
+          var fl=e.label==="Fail"||e.label==="No Good"||e.label==="Re-shim";
+          var elems=[h("path",{key:"p",d:p,fill:"none",stroke:e.dashed?"rgba(59,177,73,0.4)":"rgba(255,255,255,0.22)",strokeWidth:e.dashed?1.5:2,strokeDasharray:e.dashed?"6,4":undefined,markerEnd:e.dashed?"url(#ag)":"url(#aw)"})];
+          if(e.label){var fc2=gc(f),tc2=gc(t);elems.push(h("text",{key:"l",x:(fc2.x+tc2.x)/2,y:(fc2.y+tc2.y)/2-6,textAnchor:"middle",fontSize:"9",fontWeight:"700",fill:fl?"#EF5350":BRAND.green,style:{fontFamily:"'Montserrat',sans-serif"}},e.label))}
+          return h("g",{key:"e"+i},elems);
+        };
 
-        React.createElement("div",{ref:cRef,style:{flex:1,position:"relative",cursor:drag?"grabbing":"grab",touchAction:"none",background:"radial-gradient(ellipse at 25% 35%, rgba(59,177,73,0.03) 0%, transparent 55%), "+BRAND.navy},onMouseDown:md,onMouseMove:mm,onMouseUp:mu,onMouseLeave:mu,onTouchStart:ts,onTouchMove:tmv,onTouchEnd:te},
+        var dd=sel?details[sel]:null;
 
-          React.createElement("div",{style:{position:"absolute",top:12,left:12,background:"rgba(28,38,54,0.92)",backdropFilter:"blur(8px)",border:"1px solid rgba(59,177,73,0.2)",borderRadius:6,padding:"10px 14px",zIndex:50,display:"flex",flexDirection:"column",gap:6}},
-            React.createElement("div",{style:{fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:BRAND.orange,letterSpacing:1.5,marginBottom:2}},"LEGEND"),
-            Object.entries(CATEGORIES).filter(([k])=>k!=="housing").map(([k,c])=>React.createElement("div",{key:k,style:{display:"flex",alignItems:"center",gap:8}},React.createElement("div",{style:{width:k==="decision"?10:14,height:k==="decision"?10:14,background:c.color,borderRadius:k==="decision"?0:3,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.1)"}}),React.createElement("span",{style:{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}},c.label))),
-            React.createElement("div",{style:{display:"flex",alignItems:"center",gap:8}},React.createElement("svg",{width:14,height:8,style:{flexShrink:0}},React.createElement("line",{x1:0,y1:4,x2:14,y2:4,stroke:BRAND.green,strokeWidth:2,strokeDasharray:"4,3",opacity:0.6})),React.createElement("span",{style:{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}},"SUB-ASSY FEED")),
-            React.createElement("div",{style:{borderTop:"1px solid rgba(59,177,73,0.15)",paddingTop:6,marginTop:2,display:"flex",gap:4}},
-              React.createElement("button",{onClick:ftv,style:bs},"Fit View"),
-              React.createElement("button",{onClick:()=>setTf(t=>({...t,scale:Math.min(4,t.scale*1.3)})),style:{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}},"+"),
-              React.createElement("button",{onClick:()=>setTf(t=>({...t,scale:Math.max(0.15,t.scale*0.77)})),style:{...bs,padding:"4px 8px",fontSize:13,letterSpacing:0}},"−"),
-              React.createElement("span",{style:{color:"rgba(255,255,255,0.25)",fontSize:9,display:"flex",alignItems:"center",marginLeft:4}},Math.round(tf.scale*100)+"%")
-            )
-          ),
+        // Legend items
+        var legendItems=Object.keys(CATEGORIES).filter(function(k){return k!=="housing"}).map(function(k){
+          var c=CATEGORIES[k];
+          return h("div",{key:k,style:{display:"flex",alignItems:"center",gap:8}},
+            h("div",{style:{width:k==="decision"?10:14,height:k==="decision"?10:14,background:c.color,borderRadius:k==="decision"?0:3,transform:k==="decision"?"rotate(45deg)":undefined,flexShrink:0,border:"1px solid rgba(255,255,255,0.1)"}}),
+            h("span",{style:{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}},c.label));
+        });
 
-          React.createElement("svg",{width:"100%",height:"100%",style:{position:"absolute",top:0,left:0}},
-            React.createElement("defs",null,
-              React.createElement("marker",{id:"aw",markerWidth:8,markerHeight:6,refX:8,refY:3,orient:"auto"},React.createElement("path",{d:"M0,0 L8,3 L0,6 Z",fill:"rgba(255,255,255,0.3)"})),
-              React.createElement("marker",{id:"ag",markerWidth:7,markerHeight:5,refX:7,refY:2.5,orient:"auto"},React.createElement("path",{d:"M0,0 L7,2.5 L0,5 Z",fill:BRAND.green,opacity:0.5})),
-              React.createElement("filter",{id:"mg"},React.createElement("feDropShadow",{dx:0,dy:0,stdDeviation:5,floodColor:BRAND.orange,floodOpacity:0.4}))
+        return h("div",{style:{width:"100%",height:"100vh",background:BRAND.navy,position:"relative",overflow:"hidden",display:"flex",flexDirection:"column"}},
+
+          // Canvas
+          h("div",{ref:cRef,style:{flex:1,position:"relative",cursor:drag?"grabbing":"grab",touchAction:"none",background:"radial-gradient(ellipse at 25% 35%, rgba(59,177,73,0.03) 0%, transparent 55%), "+BRAND.navy},onMouseDown:md,onMouseMove:mm,onMouseUp:mu,onMouseLeave:mu,onTouchStart:ts,onTouchMove:tmv,onTouchEnd:te},
+
+            // Floating legend — top:8 to stay clear of iframe top edge
+            h("div",{style:{position:"absolute",top:8,left:8,background:"rgba(28,38,54,0.94)",backdropFilter:"blur(8px)",border:"1px solid rgba(59,177,73,0.2)",borderRadius:6,padding:"10px 14px",zIndex:50,display:"flex",flexDirection:"column",gap:5,maxHeight:"calc(100vh - 60px)",overflowY:"auto"}},
+              h("div",{style:{fontFamily:"'Oswald',sans-serif",fontSize:10,fontWeight:700,color:BRAND.orange,letterSpacing:1.5,marginBottom:2}},"LEGEND"),
+              legendItems,
+              h("div",{style:{display:"flex",alignItems:"center",gap:8}},
+                h("svg",{width:14,height:8,style:{flexShrink:0}},h("line",{x1:0,y1:4,x2:14,y2:4,stroke:BRAND.green,strokeWidth:2,strokeDasharray:"4,3",opacity:0.6})),
+                h("span",{style:{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:500,fontFamily:"'Montserrat',sans-serif"}},"SUB-ASSY FEED")),
+              h("div",{style:{borderTop:"1px solid rgba(59,177,73,0.15)",paddingTop:6,marginTop:2,display:"flex",gap:4}},
+                h("button",{onClick:ftv,style:bs},"Fit View"),
+                h("button",{onClick:function(){setTf(function(t){return{x:t.x,y:t.y,scale:Math.min(4,t.scale*1.3)}})},style:Object.assign({},bs,{padding:"4px 8px",fontSize:13,letterSpacing:0})},"+"),
+                h("button",{onClick:function(){setTf(function(t){return{x:t.x,y:t.y,scale:Math.max(0.15,t.scale*0.77)}})},style:Object.assign({},bs,{padding:"4px 8px",fontSize:13,letterSpacing:0})},"\u2212"),
+                h("span",{style:{color:"rgba(255,255,255,0.25)",fontSize:9,display:"flex",alignItems:"center",marginLeft:4}},Math.round(tf.scale*100)+"%")
+              )
             ),
-            React.createElement("g",{transform:"translate("+tf.x+","+tf.y+") scale("+tf.scale+")"},
-              zn.map((z,i)=>React.createElement("rect",{key:"z"+i,x:z.x,y:z.y,width:z.w,height:z.h,rx:10,fill:"rgba(128,128,128,"+z.fo+")",stroke:z.b,strokeWidth:1.5})),
-              edges.map(re),
-              nodes.map(rn)
+
+            // SVG canvas
+            h("svg",{width:"100%",height:"100%",style:{position:"absolute",top:0,left:0}},
+              h("defs",null,
+                h("marker",{id:"aw",markerWidth:8,markerHeight:6,refX:8,refY:3,orient:"auto"},h("path",{d:"M0,0 L8,3 L0,6 Z",fill:"rgba(255,255,255,0.3)"})),
+                h("marker",{id:"ag",markerWidth:7,markerHeight:5,refX:7,refY:2.5,orient:"auto"},h("path",{d:"M0,0 L7,2.5 L0,5 Z",fill:BRAND.green,opacity:0.5})),
+                h("filter",{id:"mg"},h("feDropShadow",{dx:0,dy:0,stdDeviation:5,floodColor:BRAND.orange,floodOpacity:0.4}))
+              ),
+              h("g",{transform:"translate("+tf.x+","+tf.y+") scale("+tf.scale+")"},
+                zn.map(function(z,i){return h("rect",{key:"z"+i,x:z.x,y:z.y,width:z.w,height:z.h,rx:10,fill:"rgba(128,128,128,"+z.fo+")",stroke:z.b,strokeWidth:1.5})}),
+                edges.map(re),
+                nodes.map(rn)
+              )
             )
-          )
-        ),
-
-        dd&&React.createElement("div",{style:{position:"absolute",top:12,right:16,width:380,maxWidth:"calc(100vw - 32px)",background:BRAND.navyDark,border:"1px solid rgba(59,177,73,0.2)",borderTop:"3px solid "+BRAND.green,borderRadius:"0 0 8px 8px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",zIndex:100,maxHeight:"calc(100vh - 60px)",overflowY:"auto"}},
-          React.createElement("div",{style:{padding:"14px 18px",borderBottom:"1px solid rgba(59,177,73,0.12)",display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"sticky",top:0,background:BRAND.navyDark}},
-            React.createElement("div",{style:{paddingRight:12}},React.createElement("div",{style:{color:BRAND.green,fontSize:14,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1,textTransform:"uppercase"}},dd.title),React.createElement("div",{style:{color:"rgba(255,255,255,0.4)",fontSize:11,marginTop:4}},dd.part)),
-            React.createElement("button",{onClick:()=>setSel(null),style:{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(59,177,73,0.2)",color:BRAND.green,width:26,height:26,borderRadius:4,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},String.fromCharCode(10005))
           ),
-          React.createElement("div",{style:{padding:"12px 18px 16px"}},
-            React.createElement("div",{style:{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}},"CONTROLS"),
-            React.createElement("div",{style:{color:"rgba(255,255,255,0.65)",fontSize:12,marginBottom:14,lineHeight:1.5}},dd.controls),
-            React.createElement("div",{style:{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}},"OPERATIONS"),
-            dd.operations.map((o,i)=>React.createElement("div",{key:i,style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,marginBottom:4,paddingLeft:14,position:"relative",lineHeight:1.5}},React.createElement("span",{style:{position:"absolute",left:0,color:BRAND.green,fontWeight:700}},String.fromCharCode(8250)),o)),
-            React.createElement("div",{style:{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}},"MWES EQUIPMENT"),
-            React.createElement("div",{style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6}},dd.equipment),
-            React.createElement("div",{style:{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}},"CUSTOMER EQUIPMENT"),
-            React.createElement("div",{style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6}},dd.custEquip)
-          )
-        ),
 
-        React.createElement("div",{style:{position:"absolute",bottom:0,left:0,right:0,height:28,background:BRAND.navyDark,borderTop:"1px solid rgba(59,177,73,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px"}},
-          React.createElement("div",{style:{color:"rgba(255,255,255,0.3)",fontSize:10,fontWeight:500}},Math.round(tf.scale*100)+"% \\u2022 Scroll to zoom \\u2022 Drag to pan \\u2022 Click nodes for details"),
-          React.createElement("div",{style:{color:"rgba(255,255,255,0.2)",fontSize:9,fontWeight:500,fontFamily:"'Oswald',sans-serif",letterSpacing:1}},"MWES \\u2022 INNOVATION THROUGH AUTOMATION \\u2022 MWES.COM")
-        )
-      );
+          // Detail panel
+          dd&&h("div",{style:{position:"absolute",top:8,right:12,width:380,maxWidth:"calc(100vw - 32px)",background:BRAND.navyDark,border:"1px solid rgba(59,177,73,0.2)",borderTop:"3px solid "+BRAND.green,borderRadius:"0 0 8px 8px",boxShadow:"0 20px 60px rgba(0,0,0,0.5)",zIndex:100,maxHeight:"calc(100vh - 50px)",overflowY:"auto"}},
+            h("div",{style:{padding:"14px 18px",borderBottom:"1px solid rgba(59,177,73,0.12)",display:"flex",justifyContent:"space-between",alignItems:"flex-start",position:"sticky",top:0,background:BRAND.navyDark}},
+              h("div",{style:{paddingRight:12}},
+                h("div",{style:{color:BRAND.green,fontSize:14,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1,textTransform:"uppercase"}},dd.title),
+                h("div",{style:{color:"rgba(255,255,255,0.4)",fontSize:11,marginTop:4}},dd.part)),
+              h("button",{onClick:function(){setSel(null)},style:{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(59,177,73,0.2)",color:BRAND.green,width:26,height:26,borderRadius:4,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},"\u2715")),
+            h("div",{style:{padding:"12px 18px 16px"}},
+              h("div",{style:{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}},"CONTROLS"),
+              h("div",{style:{color:"rgba(255,255,255,0.65)",fontSize:12,marginBottom:14,lineHeight:1.5}},dd.controls),
+              h("div",{style:{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginBottom:5}},"OPERATIONS"),
+              dd.operations.map(function(o,i){return h("div",{key:i,style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,marginBottom:4,paddingLeft:14,position:"relative",lineHeight:1.5}},h("span",{style:{position:"absolute",left:0,color:BRAND.green,fontWeight:700}},"\u203A"),o)}),
+              h("div",{style:{color:BRAND.green,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}},"MWES EQUIPMENT"),
+              h("div",{style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6}},dd.equipment),
+              h("div",{style:{color:BRAND.orange,fontSize:10,fontWeight:700,fontFamily:"'Oswald',sans-serif",letterSpacing:1.5,marginTop:14,marginBottom:5}},"CUSTOMER EQUIPMENT"),
+              h("div",{style:{color:"rgba(255,255,255,0.6)",fontSize:11.5,lineHeight:1.6}},dd.custEquip))
+          ),
+
+          // Status bar
+          h("div",{style:{position:"absolute",bottom:0,left:0,right:0,height:28,background:BRAND.navyDark,borderTop:"1px solid rgba(59,177,73,0.1)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px"}},
+            h("div",{style:{color:"rgba(255,255,255,0.3)",fontSize:10,fontWeight:500}},"Scroll to zoom \u2022 Drag to pan \u2022 Click nodes for details"),
+            h("div",{style:{color:"rgba(255,255,255,0.2)",fontSize:9,fontWeight:500,fontFamily:"'Oswald',sans-serif",letterSpacing:1}},"MWES \u2022 INNOVATION THROUGH AUTOMATION"))
+        );
+      }
+      return App;
     }
-    ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
-    `;
 
-    document.addEventListener('DOMContentLoaded',loadAndRender);
+    // Load and render
+    fetch("flow-data.xlsx").then(function(resp){
+      if(!resp.ok)throw new Error("Could not load flow-data.xlsx ("+resp.status+")");
+      return resp.arrayBuffer();
+    }).then(function(buf){
+      var wb=XLSX.read(buf,{type:"array"});
+      var DATA=parseWorkbook(wb);
+      var App=buildApp(DATA);
+      ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+    }).catch(function(e){
+      document.getElementById("root").innerHTML='<div style="width:100%;height:100vh;display:flex;align-items:center;justify-content:center;background:#283549;color:#f87171;font-size:14px;text-align:center;padding:40px;font-family:Montserrat,sans-serif">\u26A0 '+e.message+'<br><br>Make sure <strong>flow-data.xlsx</strong> is in the same folder as flow.html</div>';
+    });
   </script>
 </body>
 </html>
