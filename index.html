@@ -133,85 +133,9 @@ tr:hover td{background:var(--nl)}
 <iframe id="flowFrame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
 </div>
 
-<!-- ═══ SCREEN 3: PROPLANNER INTEGRATION ═══ -->
-<div class="scr" id="scr2">
-<h2 style="color:var(--g);font-size:18px;border:none;padding:0;margin-bottom:4px">ProPlanner ↔ PLC Integration</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:10px">TCP/IP Socket — ASCII String Protocol | PLC = Server, ProPlanner = Client | Based on CNH Reference Code</p>
-
-<div class="card s">
-<h3 style="color:var(--gb);font-size:13px;font-family:Oswald;text-transform:uppercase;letter-spacing:.5px">Resolved Questions</h3>
-<div class="rv"><strong>Q1:</strong> ASCII string protocol, MID() parsing. <strong>Q2:</strong> PLC=Server, ProPlanner=Client. <strong>Q3:</strong> No storage — OPTIX recipe managers. <strong>Q5:</strong> ProPlanner (not Pivotware). <strong>Q6:</strong> ProPlanner owns serial tracking. <strong>Q8:</strong> Pass/fail only.</div>
-</div>
-<div class="sd"></div>
-
-<div class="card">
-<h2 style="color:var(--g);font-size:15px">Socket Architecture</h2>
-<table>
-<tr><th>MWES PLC (Server)</th><th>IP</th><th>Port</th><th>ProPlanner</th><th>Functions</th><th>Complexity</th></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-01: Station #1</td><td class="mo">192.168.x.11</td><td class="mo">5000</td><td>PP-ST1</td><td>Pressure decay, Shift/spin</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-02: Mid-Plate</td><td class="mo">192.168.x.12</td><td class="mo">5000</td><td>PP-MP</td><td>Press, Vision, Torque</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-03: Shaft</td><td class="mo">192.168.x.13</td><td class="mo">5000</td><td>PP-SH</td><td>Press, Vision</td><td><span class="tg tg-g">LOW</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-04: S12/FP</td><td class="mo">192.168.x.14</td><td class="mo">5000</td><td>PP-FP</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-05: Pump Drive</td><td class="mo">192.168.x.15</td><td class="mo">5000</td><td>PP-PD</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-07: Front Hsg</td><td class="mo">192.168.x.17</td><td class="mo">5000</td><td>PP-FH</td><td>Press, Shim, Roll-over</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-08: Rear Hsg</td><td class="mo">192.168.x.18</td><td class="mo">5000</td><td>PP-RH</td><td>Press, Roll-over</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr style="background:var(--nd)"><td style="color:var(--tm)">PLC-06: Ring Gear</td><td style="color:var(--tm)">—</td><td style="color:var(--tm)">—</td><td style="color:var(--tm)">NONE</td><td style="color:var(--tm)">No ProPlanner</td><td><span class="tg tg-gr">N/A</span></td></tr>
-</table>
-</div>
-<div class="sd"></div>
-
-<div class="card w">
-<h2 style="color:var(--g);font-size:15px">StepNum Command Definitions</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:6px">1–4 from reference code. 5–9 MWES proposals — require CNH confirmation.</p>
-<table>
-<tr><th>Step</th><th>Command</th><th>Src</th><th>Payload</th><th>PLC Response</th><th>Stations</th></tr>
-<tr><td style="color:#f87171;font-weight:700;font-size:14px;text-align:center;font-family:Oswald">1</td><td style="font-family:Oswald;font-size:11px">ABORT</td><td><span class="tg tg-g">REF</span></td><td>None</td><td>None</td><td>All</td></tr>
-<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">2</td><td style="font-family:Oswald;font-size:11px">CAMERA_JOB</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos6 L4: Job ID</td><td class="mo">JOB;COMPLETE; / CAM;OFFLINE;</td><td>MP, Shaft, S12, PD</td></tr>
-<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">3</td><td style="font-family:Oswald;font-size:11px">CAMERA_TRIGGER</td><td><span class="tg tg-g">REF</span></td><td>None</td><td class="mo">PIC;PASS; / PIC;FAIL;</td><td>MP, Shaft, S12, PD</td></tr>
-<tr><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">4</td><td style="font-family:Oswald;font-size:11px">PRESS_CHECK</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos5 L5: Dist<br>Pos11 L6: Tol<br>Pos15 L6: Step</td><td class="mo">PRESS;PASS;dist;step;<br>PRESS;FAIL;SHORT;dist;step;</td><td>All 7 presses</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">5</td><td style="font-family:Oswald;font-size:11px">PRESSURE_DECAY</td><td><span class="tg tg-o">C13</span></td><td class="mo">PSI, Tol, Hold</td><td class="mo">DECAY;PASS;psi;step;</td><td>Stn #1 only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">6</td><td style="font-family:Oswald;font-size:11px">SHIFT_SPIN</td><td><span class="tg tg-o">C13</span></td><td class="mo">RPM, Valves, Step</td><td class="mo">SPIN;PASS;step;</td><td>Stn #1 only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">7</td><td style="font-family:Oswald;font-size:11px">SHIM_MEASURE</td><td><span class="tg tg-o">C13</span></td><td class="mo">Device#, Step</td><td class="mo">SHIM;dev;val;shim;step;</td><td>Front Hsg only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">8</td><td style="font-family:Oswald;font-size:11px">ROLLOVER_POS</td><td><span class="tg tg-o">C13</span></td><td class="mo">Angle, Step</td><td class="mo">ROLL;PASS;angle;step;</td><td>Front/Rear Hsg</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">9</td><td style="font-family:Oswald;font-size:11px">CONVEYOR_CMD</td><td><span class="tg tg-o">C13</span></td><td class="mo">Zone, Cmd, Step</td><td class="mo">CONV;PASS;zone;step;</td><td>Stn1(opt), FH, RH</td></tr>
-</table>
-</div>
-<div class="sd"></div>
-
-<div class="card">
-<h2 style="color:var(--g);font-size:15px">Typical Sequence — Press Station</h2>
-<div class="mb">ProPlanner (Client)                      PLC (Server)
-    │                                           │
-    │── "xxx2000102" ──────────────────────────► │  StepNum=2, Job=0102
-    │  ◄── "JOB;COMPLETE;" ────────────────────  │
-    │── "xxx3" ────────────────────────────────► │  StepNum=3 (trigger)
-    │  ◄── "PIC;PASS;" ───────────────────────   │  Cognex result=1
-    │── "xxx4254000050000000001" ───────────────► │  StepNum=4: 25.4mm ±0.05
-    │  ◄── "PRESS;PASS;254023;000001;" ────────  │  Reached 25.4023mm
-    │  [ProPlanner sequences torque tools       │
-    │   independently — no socket msg]          │</div>
-</div>
-<div class="sd"></div>
-
-<div class="card">
-<h2 style="color:var(--g);font-size:15px">Per-Station Message Mapping</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:8px">Click to expand.</p>
-<div id="s3stations"></div>
-</div>
-<div class="sd"></div>
-
-<div class="card w">
-<h2 style="color:var(--g);font-size:15px">Remaining Open Questions</h2>
-<table>
-<tr><th>#</th><th>Status</th><th>Question</th><th>Impact</th></tr>
-<tr><td>4</td><td><span class="tg tg-r">OPEN</span></td><td>Does PLC gate part release or ProPlanner independently releases?</td><td>Cart movement</td></tr>
-<tr><td>7</td><td><span class="tg tg-r">OPEN</span></td><td>Part tracking across no-PLC stations?</td><td>Traceability</td></tr>
-<tr><td>9</td><td><span class="tg tg-o">OPEN</span></td><td>ProPlanner sends setpoints or PLC owns via OPTIX recipe?</td><td>Recipe architecture</td></tr>
-<tr><td>11</td><td><span class="tg tg-o">OPEN</span></td><td>Can ProPlanner support extended StepNums 5–9?</td><td>C13 equipment</td></tr>
-<tr><td>12</td><td><span class="tg tg-o">OPEN</span></td><td>TCP port confirm 5000?</td><td>Socket config</td></tr>
-<tr><td>13</td><td><span class="tg tg-o">OPEN</span></td><td>Rear housing torque tool count?</td><td>Traffic sizing</td></tr>
-</table>
-</div>
+<!-- ═══ SCREEN 3: PROPLANNER INTEGRATION (iframe) ═══ -->
+<div class="scr" id="scr2" style="padding:0;height:calc(100vh - 52px);overflow:hidden">
+<iframe id="ppFrame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
 </div>
 
 <!-- FOOTER -->
@@ -222,12 +146,13 @@ tr:hover td{background:var(--nl)}
 
 <script>
 // ═══════ SCREEN NAVIGATION ═══════
-let flowLoaded=false;
+let flowLoaded=false,ppLoaded=false;
 function showScreen(n){
   document.querySelectorAll('.scr').forEach((s,i)=>{s.classList.toggle('act',i===n)});
   document.querySelectorAll('.nb').forEach((b,i)=>{b.classList.toggle('act',i===n)});
   if(n===1&&!flowLoaded){document.getElementById("flowFrame").src="flow.html";flowLoaded=true;}
-  if(n!==1)window.scrollTo(0,0);
+  if(n===2&&!ppLoaded){document.getElementById("ppFrame").src="proplanner.html";ppLoaded=true;}
+  if(n===0)window.scrollTo(0,0);
 }
 
 // ═══════ SCREEN 1: v3 FLOOR LAYOUT DATA ═══════
@@ -338,30 +263,8 @@ function rs1c(){
   document.getElementById("s1concerns").innerHTML=h;
 }
 
-// ═══════ SCREEN 3: PROPLANNER STATIONS ═══════
-const S3=[
-{id:"st1",nm:"Station #1 — Mainline",c:"var(--g)",plc:"PLC-01",tt:7,steps:[{sn:"4",cm:"PRESS_CHECK",d:"Bearing press ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"5",cm:"PRESSURE_DECAY",d:"Clutch circuit test",r:"DECAY;PASS/FAIL;psi;step;",ext:1},{sn:"6",cm:"SHIFT_SPIN",d:"Servo+valves+sensors",r:"SPIN;PASS/FAIL;step;",ext:1},{sn:"1",cm:"ABORT",d:"Emergency abort",r:"None"}],note:"7 torque tools sequenced by ProPlanner independently."},
-{id:"mp",nm:"Mid-Plate & S13",c:"#a78bfa",plc:"PLC-02",tt:4,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Cognex job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger inspection",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-20 operations",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract press & shuttle",r:"None"}],note:"Pneumatic shuttle must retract before operator access."},
-{id:"shaft",nm:"Shaft S18/S21/S25",c:"#a78bfa",plc:"PLC-03",tt:0,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job per shaft type",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-40 ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract drawer",r:"None"}],note:"Simplest interface — no torque tools."},
-{id:"s12fp",nm:"S12 & Front Plate",c:"#a78bfa",plc:"PLC-04",tt:6,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-60 LARGEST",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe all 3 axes",r:"None"}],note:"CRITICAL: Must safe main + both aux axes."},
-{id:"pd",nm:"Pump Drive & Clutch",c:"#c084fc",plc:"PLC-05",tt:7,steps:[{sn:"2",cm:"CAMERA_JOB",d:"5+ sub-assy variants",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-30 dual aux",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe 3 axes",r:"None"}],note:"Widest variety of operations. 5+ recipes."},
-{id:"fh",nm:"Front Housing",c:"#2dd4bf",plc:"PLC-07",tt:9,steps:[{sn:"4",cm:"PRESS_CHECK",d:"10 gear sub-assy ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"7",cm:"SHIM_MEASURE",d:"4 LVDT devices",r:"SHIM;dev;val;shim;step;",ext:1},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],note:"MOST COMPLEX — 10 press ops + 4 shims + roll-over per cycle."},
-{id:"rh",nm:"Rear Housing",c:"var(--o)",plc:"PLC-08",tt:"TBD",steps:[{sn:"4",cm:"PRESS_CHECK",d:"CVT output press",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],note:"Torque tool count TBD. Charge pump option may add ops."}
-];
-function initS3(){
-  let h="";S3.forEach(s=>{
-    h+=`<div class="scard" id="s3-${s.id}" onclick="document.getElementById('s3-${s.id}').classList.toggle('exp')">`;
-    h+=`<div class="shdr"><div><span style="color:${s.c};font-weight:700;font-size:13px;font-family:Oswald;text-transform:uppercase;letter-spacing:.5px">${s.nm}</span> `;
-    h+=`<span class="tg tg-b">${s.plc}</span><span class="tg tg-p">${s.tt} TOOLS</span><span class="tg tg-g">${s.steps.length} CMDS</span>`;
-    h+=`</div><span class="ei">▼</span></div><div class="sdet"><table><tr><th>Step</th><th>Command</th><th>Description</th><th>Response</th></tr>`;
-    s.steps.forEach(st=>{const sc=st.sn==="1"?"#f87171":st.sn==="2"?"var(--gb)":st.sn==="3"?"#c084fc":"var(--ob)";
-      h+=`<tr${st.ext?' style="background:#3d2a10"':''}><td style="color:${sc};font-weight:700;font-size:14px;text-align:center;font-family:Oswald">${st.sn}</td><td style="font-family:Oswald;font-size:11px;letter-spacing:.5px">${st.cm}</td><td>${st.d}</td><td class="mo" style="font-size:10px">${st.r}${st.ext?' <span class="tg tg-o">C13</span>':''}</td></tr>`;});
-    h+=`</table>`;if(s.note)h+=`<div class="nt2" style="margin-top:6px;font-size:11px">${s.note}</div>`;h+=`</div></div>`;});
-  document.getElementById("s3stations").innerHTML=h;
-}
-
 // ═══════ INIT ═══════
-document.addEventListener("DOMContentLoaded",()=>{initS1();initS3()});
+document.addEventListener("DOMContentLoaded",()=>{initS1()});
 </script>
 </body>
 </html>
