@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>C13 CVT – ProPlanner Integration | MWES</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--g:#3BB149;--n:#283549;--o:#D07A08;--gr:#E9E9E9;--nl:#344863;--nd:#1c2636;--ndr:#151d2b;--gd:#2d8a38;--gb:#4cd95a;--ob:#f0a030;--tp:#E9E9E9;--ts:#a0aec0;--tm:#6b7a8d;--bd:#3d4f65;--cb:#1e3044}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -12,8 +13,10 @@ body{font-family:'Montserrat',system-ui,sans-serif;background:var(--n);color:var
 h1,h2,h3{font-family:'Oswald',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.5px}
 .container{max-width:1500px;margin:0 auto}
 .card{background:var(--cb);border-radius:6px;padding:14px;margin-bottom:10px;border:1px solid var(--bd)}
-.card.w{border-color:var(--o);border-left:4px solid var(--o)}.card.d{border-color:#c0392b;border-left:4px solid #c0392b}
-.card.i{border-color:var(--g);border-left:4px solid var(--g)}.card.s{border-color:var(--g);background:#1a3328}
+.card.w{border-color:var(--o);border-left:4px solid var(--o)}
+.card.d{border-color:#c0392b;border-left:4px solid #c0392b}
+.card.i{border-color:var(--g);border-left:4px solid var(--g)}
+.card.s{border-color:var(--g);background:#1a3328}
 .tg{display:inline-block;font-family:Oswald;font-size:9px;padding:2px 7px;border-radius:3px;margin-right:3px;letter-spacing:.5px;text-transform:uppercase}
 .tg-g{background:var(--gd);color:var(--gb)}.tg-o{background:#5c3a10;color:var(--ob)}.tg-r{background:#5c1a1a;color:#f87171}
 .tg-b{background:#1e3a5f;color:#7eb8f0}.tg-p{background:#3b1764;color:#c4b5fd}.tg-gr{background:var(--nl);color:var(--ts);border:1px solid var(--bd)}
@@ -24,407 +27,278 @@ tr:hover td{background:var(--nl)}
 .mo{font-family:'Courier New',monospace;font-size:11px;color:var(--gb)}
 .mb{background:var(--ndr);border-radius:6px;padding:10px;margin:8px 0;font-family:'Courier New',monospace;font-size:10px;color:var(--gb);line-height:1.6;overflow-x:auto;white-space:pre;border:1px solid var(--bd)}
 .rc{background:#0c0a09;border:1px solid var(--o);border-radius:6px;padding:10px;margin:8px 0;font-family:'Courier New',monospace;font-size:10px;color:var(--ob);line-height:1.6;overflow-x:auto;white-space:pre}
-.oq{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--o);background:#3d2a10;font-size:11px;color:var(--ob);line-height:1.5}
-.nt2{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--g);background:#1a3328;font-size:11px;color:var(--gb);line-height:1.5}
-.dn{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid #c0392b;background:#3d1515;font-size:11px;color:#f87171;line-height:1.5}
 .rv{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--g);background:#14332a;font-size:11px;color:var(--gb);line-height:1.5}
+.nt2{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--g);background:#1a3328;font-size:11px;color:var(--gb);line-height:1.5}
+.oq{padding:7px 10px;margin-bottom:5px;border-radius:4px;border-left:4px solid var(--o);background:#3d2a10;font-size:11px;color:var(--ob);line-height:1.5}
+.sd{height:3px;background:linear-gradient(90deg,var(--g),var(--o),var(--g));border-radius:2px;margin:16px 0;opacity:.4}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:900px){.g2{grid-template-columns:1fr}}
-.sd{height:3px;background:linear-gradient(90deg,var(--g),var(--o),var(--g));border-radius:2px;margin:16px 0;opacity:.4}
-.toc{columns:2;column-gap:20px;font-size:12px;line-height:2.2}
-.toc a{color:var(--g);text-decoration:none;font-weight:500}.toc a:hover{text-decoration:underline;color:var(--gb)}
 .scard{background:var(--ndr);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer;border:1px solid var(--bd);transition:border-color .15s}
 .scard:hover{border-color:var(--g)}.scard.exp{border-color:var(--g);border-left:4px solid var(--g)}
 .sdet{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}.scard.exp .sdet{display:block}
 .shdr{display:flex;justify-content:space-between;align-items:center}
 .ei{color:var(--tm);font-size:12px;transition:transform .2s}.scard.exp .ei{transform:rotate(180deg);color:var(--g)}
+.loading{text-align:center;padding:60px;color:var(--g);font-family:Oswald;font-size:16px;letter-spacing:2px}
+.err{text-align:center;padding:40px;color:#f87171;font-size:13px}
 </style>
 </head>
 <body>
 <div class="container">
-
-<h2 style="color:var(--g);font-size:18px;border:none;padding:0;margin-bottom:4px">ProPlanner ↔ PLC Integration</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:10px">TCP/IP Socket — ASCII String Protocol | PLC = Server, ProPlanner = Client | Based on CNH Reference Code</p>
-
-<!-- TOC -->
-<div class="card">
-<h2 style="color:var(--g);font-size:14px;border-bottom:2px solid var(--g);padding-bottom:4px">Table of Contents</h2>
-<div class="toc">
-<a href="#sec-resolved">1. Resolved Questions</a><br>
-<a href="#sec-arch">2. Socket Architecture</a><br>
-<a href="#sec-aoi">3. SKT_AOI_TCP_SERVER State Machine</a><br>
-<a href="#sec-ref">4. Reference Code Analysis</a><br>
-<a href="#sec-proto">5. ASCII String Protocol</a><br>
-<a href="#sec-steps">6. StepNum Command Definitions</a><br>
-<a href="#sec-resp">7. PLC Response Formats</a><br>
-<a href="#sec-recipe">8. OPTIX Recipe Manager</a><br>
-<a href="#sec-seq">9. Sequence Diagrams</a><br>
-<a href="#sec-stations">10. Per-Station Message Mapping</a><br>
-<a href="#sec-noplc">11. No-PLC Stations</a><br>
-<a href="#sec-open">12. Remaining Open Questions</a><br>
+<div id="pageTitle"></div>
+<div id="content"><div class="loading">LOADING DATA FROM EXCEL...</div></div>
 </div>
-</div>
-
-<!-- 1. RESOLVED -->
-<div class="card s" id="sec-resolved">
-<h3 style="color:var(--gb);font-size:13px">1. Resolved Questions (from CNH)</h3>
-<div class="rv"><strong>Q1:</strong> ASCII string protocol, MID() parsing — confirmed by reference code.</div>
-<div class="rv"><strong>Q2:</strong> PLC = TCP SERVER (listener). ProPlanner = TCP CLIENT (initiator).</div>
-<div class="rv"><strong>Q3:</strong> No storage — OPTIX recipe managers for pass/fail criteria entry only.</div>
-<div class="rv"><strong>Q5:</strong> CNH is using ProPlanner, not full Pivotware deployment.</div>
-<div class="rv"><strong>Q6:</strong> ProPlanner handles serial number tracking independently.</div>
-<div class="rv"><strong>Q8:</strong> ProPlanner only needs PASS/FAIL — not full force/distance signatures.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 2. ARCHITECTURE -->
-<div class="card" id="sec-arch">
-<h2 style="color:var(--g);font-size:15px">2. Socket Architecture</h2>
-<div class="g2">
-<div>
-<h3 style="color:var(--g);font-size:12px;margin-bottom:4px">MWES PLC (TCP Server)</h3>
-<table><tr><th>Parameter</th><th>Value</th></tr>
-<tr><td>Role</td><td style="color:var(--g);font-weight:700">TCP SERVER (Listener)</td></tr>
-<tr><td>Processor</td><td>Allen-Bradley CompactLogix (5069)</td></tr>
-<tr><td>AOI</td><td class="mo">SKT_AOI_TCP_SERVER</td></tr>
-<tr><td>Buffer</td><td class="mo">STR_480 (480 char max)</td></tr>
-<tr><td>Timeout</td><td class="mo">5000ms (recommended)</td></tr>
-</table>
-</div>
-<div>
-<h3 style="color:var(--o);font-size:12px;margin-bottom:4px">ProPlanner (TCP Client)</h3>
-<table><tr><th>Parameter</th><th>Value</th></tr>
-<tr><td>Role</td><td style="color:var(--ob);font-weight:700">TCP CLIENT (Initiator)</td></tr>
-<tr><td>Platform</td><td>CNH ProPlanner</td></tr>
-<tr><td>Serial Tracking</td><td>ProPlanner handles independently</td></tr>
-<tr><td>Programming</td><td>NOT MWES scope</td></tr>
-</table>
-</div>
-</div>
-
-<h3 style="color:var(--ts);font-size:12px;margin-top:12px">Connection Map — 7 Active Sockets</h3>
-<table>
-<tr><th>MWES PLC (Server)</th><th>IP</th><th>Port</th><th>ProPlanner</th><th>Functions</th><th>Complexity</th></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-01: Station #1</td><td class="mo">192.168.x.11</td><td class="mo">5000</td><td>PP-ST1</td><td>Pressure decay, Shift/spin</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-02: Mid-Plate</td><td class="mo">192.168.x.12</td><td class="mo">5000</td><td>PP-MP</td><td>Press, Vision, Torque</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-03: Shaft</td><td class="mo">192.168.x.13</td><td class="mo">5000</td><td>PP-SH</td><td>Press, Vision</td><td><span class="tg tg-g">LOW</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-04: S12/FP</td><td class="mo">192.168.x.14</td><td class="mo">5000</td><td>PP-FP</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-05: Pump Drive</td><td class="mo">192.168.x.15</td><td class="mo">5000</td><td>PP-PD</td><td>Press, Vision, Torque</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-07: Front Hsg</td><td class="mo">192.168.x.17</td><td class="mo">5000</td><td>PP-FH</td><td>Press, Shim, Roll-over</td><td><span class="tg tg-r">VERY HIGH</span></td></tr>
-<tr><td style="color:var(--g);font-weight:600">PLC-08: Rear Hsg</td><td class="mo">192.168.x.18</td><td class="mo">5000</td><td>PP-RH</td><td>Press, Roll-over</td><td><span class="tg tg-o">HIGH</span></td></tr>
-<tr style="background:var(--nd)"><td style="color:var(--tm)">PLC-06: Ring Gear</td><td style="color:var(--tm)">—</td><td style="color:var(--tm)">—</td><td style="color:var(--tm)">NONE</td><td style="color:var(--tm)">No ProPlanner</td><td><span class="tg tg-gr">N/A</span></td></tr>
-</table>
-</div>
-
-<div class="sd"></div>
-
-<!-- 3. AOI STATE MACHINE -->
-<div class="card" id="sec-aoi">
-<h2 style="color:var(--g);font-size:15px">3. SKT_AOI_TCP_SERVER — State Machine</h2>
-<table>
-<tr><th>State</th><th>Action</th><th>Next</th><th>Notes</th></tr>
-<tr><td class="mo">0</td><td>Initialize — copy MSG paths, set timeouts</td><td class="mo">10</td><td>On Enable_Socket rising edge</td></tr>
-<tr><td class="mo">10</td><td>Socket Create (MSG)</td><td class="mo">15</td><td>Creates TCP socket instance</td></tr>
-<tr><td class="mo">15</td><td>Check Create result</td><td class="mo">20/110</td><td>Error → cleanup</td></tr>
-<tr><td class="mo">20</td><td>Socket Accept — listen for ProPlanner</td><td class="mo">25</td><td>PLC waits for client</td></tr>
-<tr><td class="mo">25</td><td>Check Accept result</td><td class="mo">40/20/100</td><td style="color:var(--ob)">ERR=0xFF/EXERR=0x46 = timeout → retry. Normal.</td></tr>
-<tr><td class="mo">40</td><td>Client connected — setup R/W instances</td><td class="mo">50</td><td>Accept_Response has client instance</td></tr>
-<tr><td class="mo" style="color:var(--gb);font-weight:700">50</td><td style="color:var(--gb)"><strong>READ LOOP — check for data</strong></td><td class="mo">55/60</td><td style="color:var(--gb)">Main operating state</td></tr>
-<tr><td class="mo">55</td><td>Process read — set READ flag if data</td><td class="mo">60</td><td>READ=1 when Buffer.LEN > 0</td></tr>
-<tr><td class="mo" style="color:var(--ob);font-weight:700">60</td><td style="color:var(--ob)"><strong>WRITE CHECK — send response</strong></td><td class="mo">65/70</td><td>Buffer loaded before WRITE</td></tr>
-<tr><td class="mo">65</td><td>Process write result</td><td class="mo">70</td><td>WRITE unlatched after send</td></tr>
-<tr><td class="mo">70</td><td>Loop — enabled → 50, disabled → 100</td><td class="mo">50/100</td><td>Continuous R/W loop</td></tr>
-<tr><td class="mo">100-110</td><td>Cleanup — delete socket, reset</td><td class="mo">0</td><td>Auto-restarts if Enable TRUE</td></tr>
-</table>
-
-<h3 style="color:var(--ts);font-size:12px;margin-top:10px">Required Tags Per PLC</h3>
-<div class="mb">// Controller-scope:
-SKT_AOI_Server       : SKT_AOI_TCP_SERVER
-SKT_DATA_Server      : SKT_DATA_SERVER
-
-// Program-scope:
-Enable_Server        : BOOL
-Server_Buffer        : STR_480
-Write_Data_Server    : BOOL
-
-// MSG instructions (5 required):
-SKT_MSG_Server_Create, _Accept, _Read, _Write, _Delete
-SKT_MSG_Delete_All   // Fires on first scan</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 4. REFERENCE CODE -->
-<div class="card i" id="sec-ref">
-<h2 style="color:var(--g);font-size:15px">4. Reference Code Analysis — Rands650562</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:8px">From CNH reference implementation on 5069-L306ER. Cognex IS3800 + analog distance measurement.</p>
-
-<h3 style="color:var(--ob);font-size:12px">Inbound Message Parsing</h3>
-<div class="rc">// ProPlanner sends ASCII string → PLC parses with MID()
-MID(LastRead, 1, 4, StepString);    // 1 char at pos 4
-STOD(StepString, StepNum);           // → INT
-
-// StepNum: 1=Abort, 2=Camera Job, 3=Camera Trigger, 4=Press Check
-
-// Camera Job (StepNum=2):
-MID(LastRead, 4, 6, CameraJobString); // 4 chars at pos 6
-STOD(CameraJobString, CameraJob);
-
-// Press/Distance (StepNum=4):
-MID(LastRead, 5, 5, DistanceString);     // 5 chars at pos 5
-DesiredDistance := DistanceDint / 1000;
-MID(LastRead, 6, 11, ToleranceString);   // 6 chars at pos 11
-Tolerance := ToleranceDint / 1000;
-MID(LastRead, 6, 15, PressStepNum);      // 6 chars at pos 15
-MaxDistance := DesiredDistance + Tolerance;
-MinDistance := DesiredDistance - Tolerance;</div>
-
-<h3 style="color:var(--ob);font-size:12px;margin-top:10px">Outbound Response Building</h3>
-<div class="rc">// PASS:
-CONCAT(PressHeader, Pass, Message);       // "PRESS;PASS;"
-CONCAT(Message, ReachedString, Message);  // Append distance
-CONCAT(Message, semicol, Message);
-CONCAT(Message, PressStepNum, Message);
-
-// FAIL (too short):
-CONCAT(PressHeader, Fail, Message);       // "PRESS;FAIL;"
-CONCAT(Message, PressToShort, Message);   // "SHORT;"
-
-// Camera:
-IF (IS3800:I.InspectionResults[0] = 1) THEN
-    Message := PicPass;                   // "PIC;PASS;"
-END_IF;
-
-// Trigger write:
-IF (JobChanged OR Triggered OR PressComplete) THEN
-    Write_Data_Server := 1;
-END_IF;</div>
-
-<div class="nt2"><strong>Key Takeaway:</strong> ASCII command in → MID() parse → execute → CONCAT() response → socket write. No binary, no CRC. AOI handles TCP lifecycle.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 5. PROTOCOL -->
-<div class="card" id="sec-proto">
-<h2 style="color:var(--g);font-size:15px">5. ASCII String Protocol</h2>
-<h3 style="color:var(--ob);font-size:12px">Inbound (ProPlanner → PLC)</h3>
-<div class="mb">Position:  1234|5...|...........|...............
-           SSSS DDDDD DDDDDDDDDDD DDDDDDDDDDDDDD
-           └──┘ └───────────────────────────────┘
-           Step    Variable payload (step-dependent)
-
-StepNum: Position 4, Length 1
-  MID(LastRead, 1, 4, StepString) → STOD → StepNum</div>
-
-<h3 style="color:var(--ob);font-size:12px;margin-top:10px">Outbound (PLC → ProPlanner)</h3>
-<div class="mb">Built via CONCAT(), semicolon-delimited:
-  Press Pass:   "PRESS;PASS;12345;000004;"
-  Press Fail:   "PRESS;FAIL;SHORT;12345;000004;"
-  Vision Pass:  "PIC;PASS;"
-  Vision Fail:  "PIC;FAIL;"
-  Job Changed:  "JOB;COMPLETE;"
-  Camera Off:   "CAM;OFFLINE;"</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 6. STEPNUM -->
-<div class="card w" id="sec-steps">
-<h2 style="color:var(--g);font-size:15px">6. StepNum Command Definitions — C13 Project</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:6px">1–4 from reference code. 5–9 MWES proposals — require CNH confirmation.</p>
-<table>
-<tr><th>Step</th><th>Command</th><th>Src</th><th>Payload</th><th>PLC Response</th><th>Stations</th></tr>
-<tr><td style="color:#f87171;font-weight:700;font-size:14px;text-align:center;font-family:Oswald">1</td><td style="font-family:Oswald;font-size:11px">ABORT</td><td><span class="tg tg-g">REF</span></td><td>None</td><td>None</td><td>All</td></tr>
-<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">2</td><td style="font-family:Oswald;font-size:11px">CAMERA_JOB</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos6 L4: Job ID</td><td class="mo">JOB;COMPLETE; / CAM;OFFLINE;</td><td>MP, Shaft, S12, PD</td></tr>
-<tr><td style="color:var(--gb);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">3</td><td style="font-family:Oswald;font-size:11px">CAMERA_TRIGGER</td><td><span class="tg tg-g">REF</span></td><td>None</td><td class="mo">PIC;PASS; / PIC;FAIL;</td><td>MP, Shaft, S12, PD</td></tr>
-<tr><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">4</td><td style="font-family:Oswald;font-size:11px">PRESS_CHECK</td><td><span class="tg tg-g">REF</span></td><td class="mo">Pos5 L5: Dist<br>Pos11 L6: Tol<br>Pos15 L6: Step</td><td class="mo">PRESS;PASS;dist;step;<br>PRESS;FAIL;SHORT;dist;step;</td><td>All 7 presses</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">5</td><td style="font-family:Oswald;font-size:11px">PRESSURE_DECAY</td><td><span class="tg tg-o">C13</span></td><td class="mo">PSI, Tol, Hold</td><td class="mo">DECAY;PASS;psi;step;</td><td>Stn #1 only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">6</td><td style="font-family:Oswald;font-size:11px">SHIFT_SPIN</td><td><span class="tg tg-o">C13</span></td><td class="mo">RPM, Valves, Step</td><td class="mo">SPIN;PASS;step;</td><td>Stn #1 only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">7</td><td style="font-family:Oswald;font-size:11px">SHIM_MEASURE</td><td><span class="tg tg-o">C13</span></td><td class="mo">Device#, Step</td><td class="mo">SHIM;dev;val;shim;step;</td><td>Front Hsg only</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">8</td><td style="font-family:Oswald;font-size:11px">ROLLOVER_POS</td><td><span class="tg tg-o">C13</span></td><td class="mo">Angle, Step</td><td class="mo">ROLL;PASS;angle;step;</td><td>Front/Rear Hsg</td></tr>
-<tr style="background:#3d2a10"><td style="color:var(--ob);font-weight:700;font-size:14px;text-align:center;font-family:Oswald">9</td><td style="font-family:Oswald;font-size:11px">CONVEYOR_CMD</td><td><span class="tg tg-o">C13</span></td><td class="mo">Zone, Cmd, Step</td><td class="mo">CONV;PASS;zone;step;</td><td>Stn1(opt), FH, RH</td></tr>
-</table>
-<div class="oq"><strong>OPEN:</strong> StepNums 5–9 are MWES proposals. CNH must confirm ProPlanner can support extended command types.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 7. RESPONSE FORMATS -->
-<div class="card" id="sec-resp">
-<h2 style="color:var(--g);font-size:15px">7. PLC Response Message Formats</h2>
-<h3 style="color:var(--ts);font-size:12px">Pre-Configured String Tags</h3>
-<div class="mb">PressHeader      := 'PRESS;';     Pass     := 'PASS;';
-Fail             := 'FAIL;';       semicol  := ';';
-PressToShort     := 'SHORT;';      PressToFar  := 'FAR;';
-PressureNotMet   := 'TIMEOUT;';
-PicPass          := 'PIC;PASS;';   PicFail     := 'PIC;FAIL;';
-CameraOffline    := 'CAM;OFFLINE;';
-JobChangeComplete:= 'JOB;COMPLETE;';
-
-// C13 Extensions:
-DecayHeader := 'DECAY;';  SpinHeader := 'SPIN;';
-ShimHeader  := 'SHIM;';   RollHeader := 'ROLL;';
-ConvHeader  := 'CONV;';</div>
-<div class="nt2"><strong>Distance Encoding:</strong> <span class="mo">ReachedDiatance * 10000</span> → DTOS → string. Under 6 digits gets leading zero. ProPlanner divides by 10000.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 8. RECIPE -->
-<div class="card i" id="sec-recipe">
-<h2 style="color:var(--g);font-size:15px">8. OPTIX Recipe Manager Concept</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:8px">MWES creates recipe managers on OPTIX. Operators enter pass/fail criteria. PLC tests real-time. No storage.</p>
-<div class="g2">
-<div>
-<h3 style="color:var(--g);font-size:12px">Operator Enters on OPTIX</h3>
-<table><tr><th>Field</th><th>Type</th><th>Example</th></tr>
-<tr><td>Recipe Name</td><td>STRING</td><td class="mo">"S18_BRG_PRESS"</td></tr>
-<tr><td>Target Distance</td><td>REAL (mm)</td><td class="mo">25.400</td></tr>
-<tr><td>Tolerance</td><td>REAL (mm)</td><td class="mo">0.050</td></tr>
-<tr><td>Max Force</td><td>REAL (N)</td><td class="mo">27500.0</td></tr>
-<tr><td>Decay Target</td><td>REAL (PSI)</td><td class="mo">100.0</td></tr>
-<tr><td>Hold Time</td><td>DINT (ms)</td><td class="mo">5000</td></tr>
-<tr><td>Shim Lookup</td><td>REAL[]</td><td class="mo">{0.10, 0.20...}</td></tr>
-</table>
-</div>
-<div>
-<h3 style="color:var(--ob);font-size:12px">Recipe Ownership — Open</h3>
-<div class="nt2"><strong>Option A:</strong> ProPlanner sends setpoints in command (like reference code). OPTIX = backup.</div>
-<div class="oq"><strong>Option B:</strong> ProPlanner sends step# only. PLC uses OPTIX recipe. ProPlanner gets P/F only.</div>
-<p style="font-size:11px;color:var(--ts);margin-top:6px">Reference code shows Option A. For C13 with Promess MotionPRO recipes, ownership needs clarification.</p>
-</div>
-</div>
-<h3 style="color:var(--ts);font-size:12px;margin-top:10px">Proposed UDT</h3>
-<div class="mb">Setpoints : STRUCT
-    Name           : STRING[40];
-    DesiredDistance : REAL;
-    Tolerance      : REAL;
-    MaxForce       : REAL;
-    PressTimeout   : DINT;
-    DecayTarget    : REAL;       // Stn1 only
-    DecayTolerance : REAL;
-    DecayHoldTime  : DINT;
-    ShimDeviceNum  : INT;        // FH only
-    ShimLookup     : REAL[20];
-    RolloverAngle  : INT;        // FH/RH
-    Active         : BOOL;
-END_STRUCT;
-
-Station_Recipes : Setpoints[30];</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 9. SEQUENCES -->
-<div class="card" id="sec-seq">
-<h2 style="color:var(--g);font-size:15px">9. Sequence Diagrams</h2>
-<h3 style="color:var(--ts);font-size:12px;margin-bottom:6px">9.1 Typical Press Station (e.g., Mid-Plate)</h3>
-<div class="mb">ProPlanner (Client)                      PLC (Server)
-    │                                           │
-    │── "xxx2000102" ──────────────────────────► │  StepNum=2, Job=0102
-    │  ◄── "JOB;COMPLETE;" ────────────────────  │
-    │── "xxx3" ────────────────────────────────► │  StepNum=3 (trigger)
-    │  ◄── "PIC;PASS;" ───────────────────────   │  Cognex result=1
-    │── "xxx4254000050000000001" ───────────────► │  StepNum=4: 25.4mm ±0.05
-    │  ◄── "PRESS;PASS;254023;000001;" ────────  │  Reached 25.4023mm
-    │  [ProPlanner sequences torque tools       │
-    │   independently — no socket msg]          │</div>
-
-<h3 style="color:var(--ts);font-size:12px;margin-top:12px;margin-bottom:6px">9.2 Station #1 — Pressure Decay + Shift/Spin</h3>
-<div class="mb">ProPlanner (Client)                      PLC-01 (Server)
-    │── "xxx5100000050005000" ──────────────────► │  Decay: 100.00 PSI ±0.50, 5s
-    │  ◄── "DECAY;PASS;09985;000001;" ─────────  │  Final: 99.85 PSI
-    │── "xxx6015002000001" ────────────────────► │  Spin: 150 RPM, valves 02
-    │  ◄── "SPIN;PASS;000001;" ────────────────  │  Sensors confirmed</div>
-
-<h3 style="color:var(--ts);font-size:12px;margin-top:12px;margin-bottom:6px">9.3 Front Housing — Shim + Roll-Over</h3>
-<div class="mb">ProPlanner (Client)                      PLC-07 (Server)
-    │── "xxx801000001" ────────────────────────► │  Roll to 90°
-    │  ◄── "ROLL;PASS;090;000001;" ────────────  │  Position confirmed
-    │── "xxx701000002" ────────────────────────► │  Shim device #1
-    │  ◄── "SHIM;01;02547;0020;000002;" ───────  │  2.547mm → Shim 0.20mm
-    │── "xxx4..." ─────────────────────────────► │  Press check after shim
-    │  ◄── "PRESS;PASS;..." ──────────────────   │</div>
-
-<h3 style="color:var(--ts);font-size:12px;margin-top:12px;margin-bottom:6px">9.4 Connection Loss / Recovery</h3>
-<div class="mb">ProPlanner                               PLC (Server)
-    │  [TCP drops]                              │  Read_MSG.ER → State 100
-    │                                           │  Delete → State 0 → re-create
-    │                                           │  State 20: waiting for client...
-    │  [ProPlanner reconnects]                  │  Accept_MSG.DN → State 50
-    │── "xxx..." ──────────────────────────────► │  Normal ops resume</div>
-<div class="nt2"><strong>Auto-Recovery:</strong> If <span class="mo">Stop_on_Error=FALSE</span> and <span class="mo">Enable_Socket=TRUE</span>, AOI restarts automatically. HMI shows status via <span class="mo">OPEN</span> flag.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 10. PER-STATION -->
-<div class="card" id="sec-stations">
-<h2 style="color:var(--g);font-size:15px">10. Per-Station Message Mapping</h2>
-<p style="font-size:11px;color:var(--ts);margin-bottom:8px">Click to expand.</p>
-<div id="s3stations"></div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 11. NO-PLC -->
-<div class="card d" id="sec-noplc">
-<h2 style="color:var(--g);font-size:15px">11. No-PLC Stations — ProPlanner Standalone</h2>
-<table>
-<tr><th>Station</th><th>Torque Tools</th><th>Max Torque</th><th>ProPlanner Role</th><th>MWES Socket</th></tr>
-<tr><td>Station #2</td><td style="color:var(--ob);font-weight:700">12</td><td>2,000 Nm</td><td>Full tool sequencing</td><td style="color:#f87171">NONE</td></tr>
-<tr><td>Station #3</td><td>8</td><td>325 Nm</td><td>Tool sequencing</td><td style="color:#f87171">NONE</td></tr>
-<tr><td>Hydrostat</td><td>3</td><td>280 Nm</td><td>Tool sequencing</td><td style="color:#f87171">NONE</td></tr>
-<tr><td>Planetary</td><td>2</td><td>57.3 Nm</td><td>Tool sequencing</td><td style="color:#f87171">NONE</td></tr>
-<tr><td>Top/Side Plate</td><td>2</td><td>23 Nm</td><td>Tool sequencing</td><td style="color:#f87171">NONE</td></tr>
-<tr><td>Shift Cylinder</td><td>0</td><td>—</td><td>Part rack only</td><td style="color:#f87171">NONE</td></tr>
-</table>
-<div class="nt2" style="margin-top:8px">27 torque tools across 6 stations with zero MWES interface. ProPlanner handles all sequencing, tracking, and pass/fail independently.</div>
-</div>
-
-<div class="sd"></div>
-
-<!-- 12. OPEN QUESTIONS -->
-<div class="card w" id="sec-open">
-<h2 style="color:var(--g);font-size:15px">12. Remaining Open Questions</h2>
-<table>
-<tr><th>#</th><th>Status</th><th>Question</th><th>Impact</th></tr>
-<tr><td>4</td><td><span class="tg tg-r">OPEN</span></td><td>Does PLC gate part release or ProPlanner independently releases?</td><td>Cart movement</td></tr>
-<tr><td>7</td><td><span class="tg tg-r">OPEN</span></td><td>Part tracking across no-PLC stations?</td><td>Traceability</td></tr>
-<tr><td>9</td><td><span class="tg tg-o">OPEN</span></td><td>ProPlanner sends setpoints or PLC owns via OPTIX recipe?</td><td>Recipe architecture</td></tr>
-<tr><td>11</td><td><span class="tg tg-o">OPEN</span></td><td>Can ProPlanner support extended StepNums 5–9?</td><td>C13 equipment</td></tr>
-<tr><td>12</td><td><span class="tg tg-o">OPEN</span></td><td>TCP port confirm 5000?</td><td>Socket config</td></tr>
-<tr><td>13</td><td><span class="tg tg-o">OPEN</span></td><td>Rear housing torque tool count?</td><td>Traffic sizing</td></tr>
-</table>
-</div>
-
-</div><!-- container -->
 
 <script>
-const S3=[
-{id:"st1",nm:"Station #1 — Mainline",c:"var(--g)",plc:"PLC-01",tt:7,steps:[{sn:"4",cm:"PRESS_CHECK",d:"Bearing press ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"5",cm:"PRESSURE_DECAY",d:"Clutch circuit test",r:"DECAY;PASS/FAIL;psi;step;",ext:1},{sn:"6",cm:"SHIFT_SPIN",d:"Servo+valves+sensors",r:"SPIN;PASS/FAIL;step;",ext:1},{sn:"1",cm:"ABORT",d:"Emergency abort",r:"None"}],note:"7 torque tools sequenced by ProPlanner independently."},
-{id:"mp",nm:"Mid-Plate & S13",c:"#a78bfa",plc:"PLC-02",tt:4,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Cognex job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger inspection",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-20 operations",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract press & shuttle",r:"None"}],note:"Pneumatic shuttle must retract before operator access."},
-{id:"shaft",nm:"Shaft S18/S21/S25",c:"#a78bfa",plc:"PLC-03",tt:0,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job per shaft type",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-40 ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Retract drawer",r:"None"}],note:"Simplest interface — no torque tools."},
-{id:"s12fp",nm:"S12 & Front Plate",c:"#a78bfa",plc:"PLC-04",tt:6,steps:[{sn:"2",cm:"CAMERA_JOB",d:"Job change",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-60 LARGEST",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe all 3 axes",r:"None"}],note:"CRITICAL: Must safe main + both aux axes."},
-{id:"pd",nm:"Pump Drive & Clutch",c:"#c084fc",plc:"PLC-05",tt:7,steps:[{sn:"2",cm:"CAMERA_JOB",d:"5+ sub-assy variants",r:"JOB;COMPLETE;"},{sn:"3",cm:"CAMERA_TRIGGER",d:"Trigger",r:"PIC;PASS/FAIL;"},{sn:"4",cm:"PRESS_CHECK",d:"EMAP-30 dual aux",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"1",cm:"ABORT",d:"Safe 3 axes",r:"None"}],note:"Widest variety of operations. 5+ recipes."},
-{id:"fh",nm:"Front Housing",c:"#2dd4bf",plc:"PLC-07",tt:9,steps:[{sn:"4",cm:"PRESS_CHECK",d:"10 gear sub-assy ops",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"7",cm:"SHIM_MEASURE",d:"4 LVDT devices",r:"SHIM;dev;val;shim;step;",ext:1},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],note:"MOST COMPLEX — 10 press ops + 4 shims + roll-over per cycle."},
-{id:"rh",nm:"Rear Housing",c:"var(--o)",plc:"PLC-08",tt:"TBD",steps:[{sn:"4",cm:"PRESS_CHECK",d:"CVT output press",r:"PRESS;PASS/FAIL;dist;step;"},{sn:"8",cm:"ROLLOVER_POS",d:"0°/90°/180°",r:"ROLL;PASS/FAIL;angle;step;",ext:1},{sn:"9",cm:"CONVEYOR_CMD",d:"Buffer zones",r:"CONV;PASS/FAIL;zone;step;",ext:1},{sn:"1",cm:"ABORT",d:"Safe all",r:"None"}],note:"Torque tool count TBD. Charge pump option may add ops."}
-];
-
-function init(){
-  let h="";S3.forEach(s=>{
-    h+=`<div class="scard" id="s3-${s.id}" onclick="document.getElementById('s3-${s.id}').classList.toggle('exp')">`;
-    h+=`<div class="shdr"><div><span style="color:${s.c};font-weight:700;font-size:13px;font-family:Oswald;text-transform:uppercase;letter-spacing:.5px">${s.nm}</span> `;
-    h+=`<span class="tg tg-b">${s.plc}</span><span class="tg tg-p">${s.tt} TOOLS</span><span class="tg tg-g">${s.steps.length} CMDS</span>`;
-    h+=`</div><span class="ei">▼</span></div><div class="sdet"><table><tr><th>Step</th><th>Command</th><th>Description</th><th>Response</th></tr>`;
-    s.steps.forEach(st=>{const sc=st.sn==="1"?"#f87171":st.sn==="2"?"var(--gb)":st.sn==="3"?"#c084fc":"var(--ob)";
-      h+=`<tr${st.ext?' style="background:#3d2a10"':''}><td style="color:${sc};font-weight:700;font-size:14px;text-align:center;font-family:Oswald">${st.sn}</td><td style="font-family:Oswald;font-size:11px;letter-spacing:.5px">${st.cm}</td><td>${st.d}</td><td class="mo" style="font-size:10px">${st.r}${st.ext?' <span class="tg tg-o">C13</span>':''}</td></tr>`;});
-    h+=`</table>`;if(s.note)h+=`<div class="nt2" style="margin-top:6px;font-size:11px">${s.note}</div>`;h+=`</div></div>`;});
-  document.getElementById("s3stations").innerHTML=h;
+// Complexity tag mapping
+function cxTag(v){
+  if(!v||v==='N/A')return'<span class="tg tg-gr">N/A</span>';
+  if(v==='LOW')return'<span class="tg tg-g">LOW</span>';
+  if(v==='HIGH')return'<span class="tg tg-o">HIGH</span>';
+  if(v==='VERY HIGH')return'<span class="tg tg-r">VERY HIGH</span>';
+  return'<span class="tg tg-gr">'+v+'</span>';
 }
-document.addEventListener("DOMContentLoaded",init);
+function statusTag(v){
+  if(v==='OPEN')return'<span class="tg tg-r">OPEN</span>';
+  if(v==='IN PROGRESS')return'<span class="tg tg-o">IN PROGRESS</span>';
+  if(v==='RESOLVED')return'<span class="tg tg-g">RESOLVED</span>';
+  return'<span class="tg tg-gr">'+v+'</span>';
+}
+function snColor(sn){
+  if(sn=='1')return'#f87171';if(sn=='2'||sn=='3')return'var(--gb)';return'var(--ob)';
+}
+function esc(s){return s?String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'):''}
+
+// Read sheet as array of objects (first row = headers)
+function sheetToObj(wb,name){
+  const ws=wb.Sheets[name];if(!ws)return[];
+  return XLSX.utils.sheet_to_json(ws,{defval:''});
+}
+// Read sheet as 2D array
+function sheetToArr(wb,name){
+  const ws=wb.Sheets[name];if(!ws)return[];
+  return XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+}
+
+async function load(){
+  try{
+    const resp=await fetch('proplanner-data.xlsx');
+    if(!resp.ok)throw new Error('Could not load proplanner-data.xlsx ('+resp.status+')');
+    const buf=await resp.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    render(wb);
+  }catch(e){
+    document.getElementById('content').innerHTML='<div class="err">⚠ '+esc(e.message)+'<br><br>Make sure <strong>proplanner-data.xlsx</strong> is in the same folder as this HTML file.</div>';
+  }
+}
+
+function render(wb){
+  let h='';
+
+  // --- Config ---
+  const cfg=sheetToObj(wb,'Config');
+  const cfgMap={};cfg.forEach(r=>{if(!cfgMap[r.Section])cfgMap[r.Section]={};cfgMap[r.Section][r.Key]=r.Value});
+  const pg=cfgMap['Page']||{};
+  document.getElementById('pageTitle').innerHTML=
+    '<h2 style="color:var(--g);font-size:18px;border:none;padding:0;margin-bottom:4px">'+esc(pg.title||'ProPlanner Integration')+'</h2>'+
+    '<p style="font-size:11px;color:var(--ts);margin-bottom:10px">'+esc(pg.subtitle||'')+'</p>';
+
+  // --- Resolved ---
+  const res=sheetToObj(wb,'Resolved');
+  if(res.length){
+    h+='<div class="card s"><h3 style="color:var(--gb);font-size:13px">Resolved Questions</h3>';
+    res.forEach(r=>{h+='<div class="rv"><strong>'+esc(r['Q#'])+':</strong> '+esc(r.Answer)+'</div>'});
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Architecture ---
+  const plcCfg=(cfgMap['PLC Server']||{});const ppCfg=(cfgMap['ProPlanner Client']||{});
+  h+='<div class="card"><h2 style="color:var(--g);font-size:15px">Socket Architecture</h2><div class="g2"><div>';
+  h+='<h3 style="color:var(--g);font-size:12px;margin-bottom:4px">MWES PLC (TCP Server)</h3><table><tr><th>Parameter</th><th>Value</th></tr>';
+  Object.entries(plcCfg).forEach(([k,v])=>{h+='<tr><td>'+esc(k)+'</td><td'+(k==='Role'?' style="color:var(--g);font-weight:700"':'')+'>'+esc(v)+'</td></tr>'});
+  h+='</table></div><div>';
+  h+='<h3 style="color:var(--ob);font-size:12px;margin-bottom:4px">ProPlanner (TCP Client)</h3><table><tr><th>Parameter</th><th>Value</th></tr>';
+  Object.entries(ppCfg).forEach(([k,v])=>{h+='<tr><td>'+esc(k)+'</td><td'+(k==='Role'?' style="color:var(--ob);font-weight:700"':'')+'>'+esc(v)+'</td></tr>'});
+  h+='</table></div></div>';
+
+  // --- Connection Map ---
+  const conn=sheetToObj(wb,'Connections');
+  if(conn.length){
+    h+='<h3 style="color:var(--ts);font-size:12px;margin-top:12px">Connection Map</h3>';
+    h+='<table><tr><th>PLC</th><th>IP</th><th>Port</th><th>ProPlanner</th><th>Functions</th><th>Complexity</th></tr>';
+    conn.forEach(r=>{
+      const dim=r.ProPlanner==='NONE';
+      h+='<tr'+(dim?' style="background:var(--nd)"':'')+'>';
+      h+='<td style="'+(dim?'color:var(--tm)':'color:var(--g);font-weight:600')+'">'+esc(r['PLC Name'])+'</td>';
+      h+='<td class="mo"'+(dim?' style="color:var(--tm)"':'')+'>'+esc(r['PLC IP'])+'</td>';
+      h+='<td'+(dim?' style="color:var(--tm)"':' class="mo"')+'>'+esc(r.Port)+'</td>';
+      h+='<td'+(dim?' style="color:var(--tm)"':'')+'>'+esc(r.ProPlanner)+'</td>';
+      h+='<td'+(dim?' style="color:var(--tm)"':'')+'>'+esc(r.Functions)+'</td>';
+      h+='<td>'+cxTag(r.Complexity)+'</td></tr>';
+    });
+    h+='</table>';
+  }
+  h+='</div><div class="sd"></div>';
+
+  // --- AOI State Machine ---
+  const aoi=sheetToObj(wb,'AOI States');
+  if(aoi.length){
+    h+='<div class="card"><h2 style="color:var(--g);font-size:15px">SKT_AOI_TCP_SERVER — State Machine</h2>';
+    h+='<table><tr><th>State</th><th>Action</th><th>Next</th><th>Notes</th></tr>';
+    aoi.forEach(r=>{
+      const isMain=String(r.State)==='50'||String(r.State)==='60';
+      const mc=String(r.State)==='50'?'var(--gb)':String(r.State)==='60'?'var(--ob)':'';
+      h+='<tr><td class="mo"'+(mc?' style="color:'+mc+';font-weight:700"':'')+'>'+esc(r.State)+'</td>';
+      h+='<td'+(isMain?' style="color:'+mc+';font-weight:700"':'')+'>'+(isMain?'<strong>':'')+esc(r.Action)+(isMain?'</strong>':'')+'</td>';
+      h+='<td class="mo">'+esc(r['Next State'])+'</td>';
+      h+='<td'+(String(r.Notes).includes('timeout')?' style="color:var(--ob)"':'')+'>'+esc(r.Notes)+'</td></tr>';
+    });
+    h+='</table>';
+  }
+
+  // --- Code: PLC Tags ---
+  const code=sheetToObj(wb,'Code Blocks');
+  const codeMap={};code.forEach(r=>{codeMap[r['Block Name']]=r.Content});
+  if(codeMap['PLC Tags']){
+    h+='<h3 style="color:var(--ts);font-size:12px;margin-top:10px">Required PLC Tags</h3>';
+    h+='<div class="mb">'+esc(codeMap['PLC Tags'])+'</div>';
+  }
+  h+='</div><div class="sd"></div>';
+
+  // --- Reference Code ---
+  if(codeMap['Reference Inbound']||codeMap['Reference Outbound']){
+    h+='<div class="card i"><h2 style="color:var(--g);font-size:15px">Reference Code Analysis</h2>';
+    if(codeMap['Reference Inbound']){h+='<h3 style="color:var(--ob);font-size:12px">Inbound Parsing</h3><div class="rc">'+esc(codeMap['Reference Inbound'])+'</div>';}
+    if(codeMap['Reference Outbound']){h+='<h3 style="color:var(--ob);font-size:12px;margin-top:10px">Outbound Responses</h3><div class="rc">'+esc(codeMap['Reference Outbound'])+'</div>';}
+    h+='<div class="nt2"><strong>Key Takeaway:</strong> ASCII command in → MID() parse → execute → CONCAT() response → socket write. No binary, no CRC.</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Protocol ---
+  if(codeMap['Protocol Inbound']||codeMap['Protocol Outbound']){
+    h+='<div class="card"><h2 style="color:var(--g);font-size:15px">ASCII String Protocol</h2>';
+    if(codeMap['Protocol Inbound']){h+='<h3 style="color:var(--ob);font-size:12px">Inbound (ProPlanner → PLC)</h3><div class="mb">'+esc(codeMap['Protocol Inbound'])+'</div>';}
+    if(codeMap['Protocol Outbound']){h+='<h3 style="color:var(--ob);font-size:12px;margin-top:8px">Outbound (PLC → ProPlanner)</h3><div class="mb">'+esc(codeMap['Protocol Outbound'])+'</div>';}
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- StepNum Commands ---
+  const steps=sheetToObj(wb,'StepNum Commands');
+  if(steps.length){
+    h+='<div class="card w"><h2 style="color:var(--g);font-size:15px">StepNum Command Definitions</h2>';
+    h+='<table><tr><th>Step</th><th>Command</th><th>Src</th><th>Payload</th><th>Response</th><th>Stations</th></tr>';
+    steps.forEach(r=>{
+      const isExt=r.Source==='C13';
+      h+='<tr'+(isExt?' style="background:#3d2a10"':'')+'>';
+      h+='<td style="color:'+snColor(r.StepNum)+';font-weight:700;font-size:14px;text-align:center;font-family:Oswald">'+esc(r.StepNum)+'</td>';
+      h+='<td style="font-family:Oswald;font-size:11px;letter-spacing:.5px">'+esc(r.Command)+'</td>';
+      h+='<td><span class="tg '+(isExt?'tg-o':'tg-g')+'">'+esc(r.Source)+'</span></td>';
+      h+='<td class="mo">'+esc(r.Payload)+'</td>';
+      h+='<td class="mo" style="font-size:10px">'+esc(r.Response)+'</td>';
+      h+='<td>'+esc(r.Stations)+'</td></tr>';
+    });
+    h+='</table>';
+    h+='<div class="oq"><strong>OPEN:</strong> StepNums 5–9 are MWES proposals. CNH must confirm ProPlanner can support extended command types.</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Response Tags ---
+  if(codeMap['Response Tags']){
+    h+='<div class="card"><h2 style="color:var(--g);font-size:15px">PLC Response Formats</h2>';
+    h+='<div class="mb">'+esc(codeMap['Response Tags'])+'</div>';
+    h+='<div class="nt2"><strong>Distance Encoding:</strong> ReachedDiatance * 10000 → DTOS → string. Under 6 digits gets leading zero.</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Recipe UDT ---
+  if(codeMap['Recipe UDT']){
+    h+='<div class="card i"><h2 style="color:var(--g);font-size:15px">OPTIX Recipe Manager</h2>';
+    h+='<div class="mb">'+esc(codeMap['Recipe UDT'])+'</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Sequence Diagrams ---
+  const seqs=code.filter(r=>String(r['Block Name']).startsWith('Sequence_'));
+  if(seqs.length){
+    h+='<div class="card"><h2 style="color:var(--g);font-size:15px">Sequence Diagrams</h2>';
+    seqs.forEach(r=>{
+      const label=String(r['Block Name']).replace('Sequence_','').replace(/_/g,' ');
+      h+='<h3 style="color:var(--ts);font-size:12px;margin-top:10px;margin-bottom:4px">'+esc(label)+'</h3>';
+      h+='<div class="mb">'+esc(r.Content)+'</div>';
+    });
+    h+='<div class="nt2"><strong>Auto-Recovery:</strong> If Stop_on_Error=FALSE and Enable_Socket=TRUE, AOI restarts automatically. HMI shows status via OPEN flag.</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Per-Station Mapping ---
+  const stns=sheetToObj(wb,'Stations');
+  if(stns.length){
+    h+='<div class="card"><h2 style="color:var(--g);font-size:15px">Per-Station Message Mapping</h2>';
+    h+='<p style="font-size:11px;color:var(--ts);margin-bottom:8px">Click to expand.</p>';
+    // Group by station name
+    const groups={};const order=[];
+    stns.forEach(r=>{
+      const nm=r['Station Name'];
+      if(!groups[nm]){groups[nm]={color:r.Color,plc:r.PLC,tools:r.Tools,note:r.Note,steps:[]};order.push(nm)}
+      groups[nm].steps.push(r);
+      if(r.Note&&!groups[nm].note)groups[nm].note=r.Note;
+    });
+    order.forEach((nm,idx)=>{
+      const g=groups[nm];const sid='stn'+idx;
+      h+='<div class="scard" id="'+sid+'" onclick="document.getElementById(\''+sid+'\').classList.toggle(\'exp\')">';
+      h+='<div class="shdr"><div>';
+      h+='<span style="color:'+g.color+';font-weight:700;font-size:13px;font-family:Oswald;text-transform:uppercase;letter-spacing:.5px">'+esc(nm)+'</span> ';
+      h+='<span class="tg tg-b">'+esc(g.plc)+'</span>';
+      h+='<span class="tg tg-p">'+esc(g.tools)+' TOOLS</span>';
+      h+='<span class="tg tg-g">'+g.steps.length+' CMDS</span>';
+      h+='</div><span class="ei">▼</span></div>';
+      h+='<div class="sdet"><table><tr><th>Step</th><th>Command</th><th>Description</th><th>Response</th></tr>';
+      g.steps.forEach(st=>{
+        const isExt=st.Extended==='EXT';
+        h+='<tr'+(isExt?' style="background:#3d2a10"':'')+'>';
+        h+='<td style="color:'+snColor(st.StepNum)+';font-weight:700;font-size:14px;text-align:center;font-family:Oswald">'+esc(st.StepNum)+'</td>';
+        h+='<td style="font-family:Oswald;font-size:11px;letter-spacing:.5px">'+esc(st.Command)+'</td>';
+        h+='<td>'+esc(st.Description)+'</td>';
+        h+='<td class="mo" style="font-size:10px">'+esc(st.Response)+(isExt?' <span class="tg tg-o">C13</span>':'')+'</td></tr>';
+      });
+      h+='</table>';
+      if(g.note)h+='<div class="nt2" style="margin-top:6px;font-size:11px">'+esc(g.note)+'</div>';
+      h+='</div></div>';
+    });
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- No-PLC ---
+  const noplc=sheetToObj(wb,'No-PLC Stations');
+  if(noplc.length){
+    h+='<div class="card d"><h2 style="color:var(--g);font-size:15px">No-PLC Stations — ProPlanner Standalone</h2>';
+    h+='<table><tr><th>Station</th><th>Tools</th><th>Max Torque</th><th>ProPlanner Role</th><th>MWES Socket</th></tr>';
+    noplc.forEach(r=>{
+      h+='<tr><td>'+esc(r.Station)+'</td>';
+      h+='<td'+(String(r.Tools)==='12'?' style="color:var(--ob);font-weight:700"':'')+'>'+esc(r.Tools)+'</td>';
+      h+='<td>'+esc(r['Max Torque'])+'</td>';
+      h+='<td>'+esc(r['ProPlanner Role'])+'</td>';
+      h+='<td style="color:#f87171">'+esc(r['MWES Socket'])+'</td></tr>';
+    });
+    h+='</table>';
+    h+='<div class="nt2" style="margin-top:8px">27 torque tools across 6 stations with zero MWES interface. ProPlanner handles all sequencing independently.</div>';
+    h+='</div><div class="sd"></div>';
+  }
+
+  // --- Open Questions ---
+  const oq=sheetToObj(wb,'Open Questions');
+  if(oq.length){
+    h+='<div class="card w"><h2 style="color:var(--g);font-size:15px">Remaining Open Questions</h2>';
+    h+='<table><tr><th>#</th><th>Status</th><th>Question</th><th>Impact</th></tr>';
+    oq.forEach(r=>{
+      h+='<tr><td>'+esc(r['Q#'])+'</td><td>'+statusTag(r.Status)+'</td><td>'+esc(r.Question)+'</td><td>'+esc(r.Impact)+'</td></tr>';
+    });
+    h+='</table></div>';
+  }
+
+  document.getElementById('content').innerHTML=h;
+}
+
+document.addEventListener('DOMContentLoaded',load);
 </script>
 </body>
 </html>
